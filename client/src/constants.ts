@@ -4,12 +4,14 @@
 /**
  * Fixed-point scale factor: gradient_int = Math.round(grad_float * SCALE_FACTOR)
  *
- * With t=100 (BfvPreset plaintext modulus), the overflow safety invariant
+ * Demo assumption: with t=100 (the plaintext modulus used by this repository's
+ * current local test/demo setup), the overflow safety invariant
  * requires: MAX_CLIENTS * SCALE_FACTOR * MAX_GRAD_ABS < t / 2 = 50.
  * Using S=4, n_max=10, G=1.0: 10 * 4 * 1 = 40 < 50. OK.
  *
- * This yields ~25% quantization granularity -- sufficient for a demo.
- * Production would require a larger plaintext modulus.
+ * This yields ~25% quantization granularity -- sufficient for the local demo.
+ * Full Interfold integration should source the active preset parameters from
+ * the upstream environment instead of treating these comments as authoritative.
  */
 export const SCALE_FACTOR = 4;
 
@@ -34,12 +36,14 @@ export const MAX_GRAD_INT = Math.floor(MAX_GRAD_ABS * SCALE_FACTOR);
 export const DEFAULT_SLOTS_PER_CT = 8192;
 
 /**
- * Plaintext modulus from the BFV preset.
- * Both SecureThreshold8192 and InsecureThreshold512 use t=100.
+ * Demo fallback plaintext modulus.
+ *
+ * The current repository's tests and local scripts assume t=100. Treat this as
+ * demo wiring only; full Interfold integration should prefer upstream preset data.
  *
  * AGENTS.MD: "Read t from the preset at startup -- do not hardcode it."
- * This constant is used as a fallback; the actual value should be read
- * from the BFV parameters when available.
+ * This constant is used only as a fallback; the actual value should be read
+ * from BFV parameters or other verified upstream configuration when available.
  */
 export const PLAINTEXT_MODULUS = 100n;
 

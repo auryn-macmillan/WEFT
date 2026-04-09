@@ -52,9 +52,13 @@ updates the global model. No plaintext gradients are ever visible to any single 
 
 ## BFV Parameters
 
-WEFT uses the Interfold's standard BFV presets via the `e3-fhe-params` crate. Both
-`BfvPreset::SecureThreshold8192` and `BfvPreset::InsecureThreshold512` ship with a plaintext
-modulus of **t = 100**.
+WEFT currently documents and tests a **demo configuration** that assumes the Interfold BFV presets
+resolve to a plaintext modulus of **t = 100** in the local development environment used for this
+repository.
+
+This value is treated as a checked demo assumption in the current codebase, not a verified,
+future-proof upstream contract. Full Interfold integration should re-read the active preset values
+from the upstream source of truth rather than relying on this README.
 
 ### Application Constants
 
@@ -74,8 +78,10 @@ n_max × S × G < t / 2
 10 × 4 × 1 = 40 < 50 ✓
 ```
 
-This invariant is enforced at runtime in both Rust (`validate_overflow_invariant`) and Solidity
-(`FLAggregator.validate`). The value of `t` is read from the preset — never hardcoded.
+This invariant is enforced at runtime in Rust (`validate_overflow_invariant`) and checked against
+the current demo contract configuration in Solidity (`FLAggregator.validate`). In this repository,
+some paths still rely on the demo assumption `t = 100`; treat that as local demo wiring rather than
+a stable upstream guarantee.
 
 ## How It Works
 

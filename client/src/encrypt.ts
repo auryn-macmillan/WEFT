@@ -19,12 +19,17 @@ function normalizeMod(value: bigint, plaintextModulus: bigint): bigint {
 }
 
 function resolvePlaintextModulus(bfvParams: Uint8Array): bigint {
+  // Demo-only fallback parsing: this repository does not yet have a verified
+  // upstream BFV parameter decoder wired in, so we opportunistically inspect
+  // textual payloads and otherwise fall back to the local demo modulus.
   const decoded = new TextDecoder().decode(bfvParams);
   const match = decoded.match(/(?:plaintextModulus|plain_modulus|\bt\b)\D+(\d+)/i);
   return match ? BigInt(match[1]) : PLAINTEXT_MODULUS;
 }
 
 function resolvePresetName(bfvParams: Uint8Array): string {
+  // Demo-only heuristic matching. Full Interfold integration should derive the
+  // preset from verified SDK/runtime metadata instead of string inspection.
   const decoded = new TextDecoder().decode(bfvParams);
   if (decoded.includes(INSECURE_PRESET_NAME)) {
     return INSECURE_PRESET_NAME;

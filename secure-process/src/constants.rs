@@ -3,12 +3,14 @@
 
 /// Fixed-point scale factor: gradient_int = round(grad_float * SCALE_FACTOR)
 ///
-/// With t=100 (BfvPreset plaintext modulus), the overflow safety invariant
+/// Demo assumption: with t=100 (the plaintext modulus used by this repository's
+/// current local test/demo setup), the overflow safety invariant
 /// requires: MAX_CLIENTS * SCALE_FACTOR * MAX_GRAD_ABS < t / 2 = 50.
 /// Using S=4, n_max=10, G=1.0: 10 * 4 * 1 = 40 < 50. OK.
 ///
-/// This yields ~25% quantization granularity — sufficient for a demo.
-/// Production would require a larger plaintext modulus.
+/// This yields ~25% quantization granularity — sufficient for the local demo.
+/// Full Interfold integration should source the active preset parameters from the
+/// upstream environment instead of treating this comment as authoritative.
 pub const SCALE_FACTOR: u64 = 4;
 
 /// Maximum number of participating clients per FL round.
@@ -27,6 +29,9 @@ pub const MAX_GRAD_INT: u64 = (MAX_GRAD_ABS as u64) * SCALE_FACTOR;
 /// Invariant: n_max * S * G < t / 2
 ///
 /// AGENTS.MD: "Read t from the preset at startup — do not hardcode it."
+/// In this repository, callers still pass the demo modulus explicitly during
+/// tests, so this helper validates the assumption without embedding a fixed
+/// production source of truth here.
 pub fn validate_overflow_invariant(plaintext_modulus: u64, num_clients: u32) {
     let max_sum = (num_clients as u64) * SCALE_FACTOR * (MAX_GRAD_ABS as u64);
     let half_t = plaintext_modulus / 2;
@@ -61,14 +66,14 @@ mod tests {
 
     #[test]
     fn overflow_invariant_holds_for_demo_params() {
-        // t=100 for both presets
+        // Demo assumption used across this repository's current tests.
         validate_overflow_invariant(100, MAX_CLIENTS);
     }
 
     #[test]
     #[should_panic(expected = "Overflow safety invariant violated")]
     fn overflow_invariant_rejects_large_clients() {
-        // 100 clients * 4 * 1 = 400 >= 50
+        // Demo assumption: 100 clients * 4 * 1 = 400 >= 50
         validate_overflow_invariant(100, 100);
     }
 
