@@ -1,0 +1,25 @@
+{
+  "name": "weft",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "client",
+    "coordinator"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces --if-present",
+    "test:client": "npm test -w client",
+    "test:coordinator": "npm test -w coordinator",
+    "demo": "npx tsx scripts/run-round.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "dependencies": {
+    "ethers": "^6.0.0"
+  }
+}

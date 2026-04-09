@@ -1,0 +1,23 @@
+[package]
+name = "weft-secure-process"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+e3-compute-provider = { path = "/tmp/enclave/crates/compute-provider" }
+e3-fhe-params = { path = "/tmp/enclave/crates/fhe-params", features = ["abi-encoding"] }
+fhe = { git = "https://github.com/gnosisguild/fhe.rs" }
+fhe-traits = { git = "https://github.com/gnosisguild/fhe.rs" }
+fhe-math = { git = "https://github.com/gnosisguild/fhe.rs" }
+ndarray = "0.15"
+num-bigint = "0.4"
+rand = "0.8"
+rayon = "1.10"
+zeroize = "1.8"
+
+# risc0-zkvm is only needed for the RISC Zero guest (main.rs), not for the library or examples.
+# Commented out for now — main.rs won't compile without it, but lib.rs and examples will.
+# risc0-zkvm = { version = "1.0" }
+
+[[example]]
+name = "threshold_demo"
