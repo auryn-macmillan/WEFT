@@ -130,40 +130,34 @@ arithmetic only — fractional scalars in the encrypted domain would corrupt res
 # Install Node dependencies
 npm install
 
-# Run the plaintext simulation demo
+# Run the narrated demo (no Rust required — fast, great for presentations)
 npx tsx scripts/run-round.ts
 
-# Run the encrypted threshold demo (requires Rust toolchain)
+# Run the encrypted demo (real BFV encryption — requires Rust toolchain)
 cargo run --example threshold_demo --manifest-path secure-process/Cargo.toml
-
-# Run client SDK tests
-npx vitest run --dir client/tests
-
-# Run Rust tests (includes secure-process unit tests)
-cargo test --manifest-path secure-process/Cargo.toml
-
-# Run Solidity tests (requires Foundry)
-forge test --root contracts
 ```
 
-### Encrypted Demo
+### The Demos
 
-The encrypted demo (`secure-process/examples/threshold_demo.rs`) performs a real
-threshold-encrypted FL round locally:
+Both demos tell the same story: **three hospitals training a shared diabetes prediction model
+without exposing any patient data**. They walk through each phase with narrated explanations,
+show what an attacker would see (encrypted gibberish), and reveal that only the aggregate — never
+individual contributions — is decrypted.
 
-1. **Threshold DKG** — 5 parties generate secret keys, Shamir-share them, and aggregate a collective BFV public key
-2. **Smudging noise** — each party generates and shares smudging noise for decryption privacy
-3. **Gradient encryption** — 3 simulated clients quantize and encrypt 512-element gradient vectors
-4. **Homomorphic summation** — ciphertexts are summed per chunk (same logic as `fhe_processor`)
-5. **Threshold decryption** — only 3-of-5 parties (non-contiguous subset) provide decryption shares
-6. **Verification** — decrypted result is compared against a plaintext shadow for correctness
+**Simulation demo** (`scripts/run-round.ts`) — runs instantly, no Rust needed. Simulates the
+encryption pipeline with plaintext integer arithmetic that mirrors BFV's behavior. Best for
+quick presentations.
 
-Uses `fhe::trbfv` (Shamir secret sharing + Lagrange interpolation) for true threshold (t-of-n)
-decryption. BFV parameters: degree=8192, t=100, 4 ciphertext moduli (from fhe.rs reference).
-No blockchain, RISC Zero, or E3 infrastructure required.
+**Encrypted demo** (`secure-process/examples/threshold_demo.rs`) — uses real BFV homomorphic
+encryption with threshold key generation (5 committee members, need 3 to decrypt), real
+ciphertext addition, and real Shamir-based threshold decryption. Takes a few seconds to run.
+Best for demonstrating that the cryptography actually works.
 
 ```bash
-cargo run --example threshold_demo --manifest-path secure-process/Cargo.toml
+# Run tests
+npx vitest run --dir client/tests
+cargo test --manifest-path secure-process/Cargo.toml
+forge test --root contracts  # requires Foundry
 ```
 
 ## Testing
