@@ -1,5 +1,7 @@
 import {
+  BITS_PER_GRADIENT,
   DEFAULT_SLOTS_PER_CT,
+  GRADIENTS_PER_CT,
   MAX_CLIENTS,
   MAX_GRAD_ABS,
   PLAINTEXT_MODULUS,
@@ -14,73 +16,122 @@ function clampGradient(value: number, maxGradAbs: number): number {
   return Math.min(Math.max(value, -maxGradAbs), maxGradAbs);
 }
 
-function normalizeMod(value: bigint, plaintextModulus: bigint): bigint {
-  return ((value % plaintextModulus) + plaintextModulus) % plaintextModulus;
-}
-
 function resolvePlaintextModulus(bfvParams: Uint8Array): bigint {
-  // Demo-only fallback parsing: this repository does not yet have a verified
-  // upstream BFV parameter decoder wired in, so we opportunistically inspect
-  // textual payloads and otherwise fall back to the local demo modulus.
   const decoded = new TextDecoder().decode(bfvParams);
   const match = decoded.match(/(?:plaintextModulus|plain_modulus|\bt\b)\D+(\d+)/i);
   return match ? BigInt(match[1]) : PLAINTEXT_MODULUS;
 }
 
 function resolvePresetName(bfvParams: Uint8Array): string {
-  // Demo-only heuristic matching. Full Interfold integration should derive the
-  // preset from verified SDK/runtime metadata instead of string inspection.
   const decoded = new TextDecoder().decode(bfvParams);
-  if (decoded.includes(INSECURE_PRESET_NAME)) {
-    return INSECURE_PRESET_NAME;
-  }
-  if (decoded.includes(SECURE_PRESET_NAME)) {
-    return SECURE_PRESET_NAME;
-  }
+  if (decoded.includes(INSECURE_PRESET_NAME)) return INSECURE_PRESET_NAME;
+  if (decoded.includes(SECURE_PRESET_NAME)) return SECURE_PRESET_NAME;
   return DEFAULT_SLOTS_PER_CT === 512 ? INSECURE_PRESET_NAME : SECURE_PRESET_NAME;
 }
 
-// AGENTS.MD: Gradient Encoding
+function bitsNeeded(scaleFactor: number, maxGradAbs: number): number {
+  return Math.ceil(Math.log2(2 * scaleFactor * maxGradAbs + 1));
+}
+
+/**
+ * Bitplane-encode a single gradient into B coefficient values (each 0 or 1).
+ *
+ * Encoding: clamp → scale → offset to unsigned → decompose into bits.
+ * Each bit becomes one BFV coefficient. After homomorphic addition across N
+ * clients, coefficient[b] holds a tally count in [0, N] rather than a gradient
+ * magnitude, which is why the overflow constraint reduces to n_max < t/2.
+ */
+export function encodeBitplane(
+  gradient: number,
+  scaleFactor: number = SCALE_FACTOR,
+  maxGradAbs: number = MAX_GRAD_ABS,
+): number[] {
+  const clamped = clampGradient(gradient, maxGradAbs);
+  const scaled = Math.round(clamped * scaleFactor);
+  const unsigned = scaled + scaleFactor * maxGradAbs;
+  const B = bitsNeeded(scaleFactor, maxGradAbs);
+  const bits: number[] = new Array(B);
+  for (let b = 0; b < B; b++) {
+    bits[b] = (unsigned >> b) & 1;
+  }
+  return bits;
+}
+
+/**
+ * Decode bitplane tallies back to a float gradient (post-decryption).
+ *
+ * After threshold decryption, each coefficient holds the sum of that bit
+ * position across all clients. Reconstruct: weighted sum → remove offset → divide.
+ */
+export function decodeBitplane(
+  tallies: number[],
+  numClients: number,
+  scaleFactor: number = SCALE_FACTOR,
+  maxGradAbs: number = MAX_GRAD_ABS,
+): number {
+  let weightedSum = 0;
+  for (let b = 0; b < tallies.length; b++) {
+    weightedSum += tallies[b] * (1 << b);
+  }
+  const offsetRemoved = weightedSum - numClients * scaleFactor * maxGradAbs;
+  return offsetRemoved / (numClients * scaleFactor);
+}
+
+/**
+ * Quantize an array of gradients into bitplane-encoded BFV coefficients.
+ *
+ * Returns a flat bigint[] where every BITS_PER_GRADIENT consecutive values
+ * represent one gradient's bit decomposition. This flat array maps directly
+ * to BFV polynomial coefficients.
+ */
 export function quantizeGradients(
   gradients: Float32Array,
   scaleFactor: number = SCALE_FACTOR,
   maxGradAbs: number = MAX_GRAD_ABS,
-  plaintextModulus: bigint = PLAINTEXT_MODULUS,
 ): bigint[] {
-  return Array.from(gradients, (gradient) => {
-    const clamped = clampGradient(gradient, maxGradAbs);
-    const quantized = Math.round(clamped * scaleFactor);
-    if (quantized < 0) {
-      return normalizeMod(plaintextModulus - BigInt(Math.abs(quantized)), plaintextModulus);
+  const coefficients: bigint[] = [];
+  for (let i = 0; i < gradients.length; i++) {
+    const bits = encodeBitplane(gradients[i], scaleFactor, maxGradAbs);
+    for (const bit of bits) {
+      coefficients.push(BigInt(bit));
     }
-    return normalizeMod(BigInt(quantized), plaintextModulus);
-  });
+  }
+  return coefficients;
 }
 
+/**
+ * Dequantize bitplane-encoded coefficients back to float gradients.
+ *
+ * The input is a flat array of tally values (post-homomorphic-sum, post-decryption).
+ * Every BITS_PER_GRADIENT consecutive values form one gradient's tallies.
+ */
 export function dequantizeGradients(
-  quantized: bigint[],
+  coefficients: bigint[],
   numClients: number,
   scaleFactor: number = SCALE_FACTOR,
-  plaintextModulus: bigint = PLAINTEXT_MODULUS,
+  maxGradAbs: number = MAX_GRAD_ABS,
 ): Float32Array {
   if (numClients <= 0) {
     throw new Error("numClients must be greater than zero");
   }
 
-  const denominator = numClients * scaleFactor;
-  const halfModulus = plaintextModulus / 2n;
+  const B = bitsNeeded(scaleFactor, maxGradAbs);
+  const numGradients = Math.floor(coefficients.length / B);
+  const result = new Float32Array(numGradients);
 
-  return Float32Array.from(
-    quantized.map((value) => {
-      const normalized = normalizeMod(value, plaintextModulus);
-      const signed = normalized > halfModulus ? normalized - plaintextModulus : normalized;
-      return Number(signed) / denominator;
-    }),
-  );
+  for (let g = 0; g < numGradients; g++) {
+    const tallies: number[] = new Array(B);
+    for (let b = 0; b < B; b++) {
+      tallies[b] = Number(coefficients[g * B + b]);
+    }
+    result[g] = decodeBitplane(tallies, numClients, scaleFactor, maxGradAbs);
+  }
+
+  return result;
 }
 
 export function splitIntoChunks(
-  quantized: bigint[],
+  coefficients: bigint[],
   slotsPerCt: number = DEFAULT_SLOTS_PER_CT,
 ): bigint[][] {
   if (slotsPerCt <= 0) {
@@ -88,8 +139,8 @@ export function splitIntoChunks(
   }
 
   const chunks: bigint[][] = [];
-  for (let index = 0; index < quantized.length; index += slotsPerCt) {
-    const chunk = quantized.slice(index, index + slotsPerCt);
+  for (let index = 0; index < coefficients.length; index += slotsPerCt) {
+    const chunk = coefficients.slice(index, index + slotsPerCt);
     while (chunk.length < slotsPerCt) {
       chunk.push(0n);
     }
@@ -108,12 +159,7 @@ export async function encryptGradients(
   const plaintextModulus = resolvePlaintextModulus(bfvParams);
   validateOverflowInvariant(plaintextModulus, MAX_CLIENTS);
 
-  const quantized = quantizeGradients(
-    gradients,
-    scaleFactor,
-    MAX_GRAD_ABS,
-    plaintextModulus,
-  );
+  const quantized = quantizeGradients(gradients, scaleFactor, MAX_GRAD_ABS);
   const chunks = splitIntoChunks(quantized, DEFAULT_SLOTS_PER_CT);
   const presetName = resolvePresetName(bfvParams);
 

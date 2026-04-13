@@ -77,8 +77,10 @@ contract FLAggregator is IE3Program, Ownable {
     if (scaleFactor == 0) revert InvalidScaleFactor();
     if (coordinator == address(0)) revert InvalidCoordinator();
 
-    // AGENTS.MD §Overflow Safety Invariant
-    if (uint256(numClients) * uint256(scaleFactor) * uint256(maxGradInt) >= PLAINTEXT_MOD / 2) {
+    // AGENTS.MD §Overflow Safety Invariant (bitplane tally encoding)
+    // With bitplane encoding, each BFV coefficient holds a tally count (0..numClients),
+    // so the constraint is simply: numClients < t / 2.
+    if (uint256(numClients) >= PLAINTEXT_MOD / 2) {
       revert OverflowInvariantViolated();
     }
 

@@ -5,6 +5,7 @@ import * as weftClient from "@weft/client";
 import { applyGradientUpdate } from "./model.js";
 
 const {
+  BITS_PER_GRADIENT,
   DEFAULT_SLOTS_PER_CT,
   PLAINTEXT_MODULUS,
   SCALE_FACTOR,
@@ -96,9 +97,13 @@ export async function runRound(
   const [, output] = await waitForEvent(enclave, "PlaintextOutputPublished", [e3Id]);
   const chunks = decodeOutput(toUint8Array(output), plaintextModulus);
 
-  // 6-8. Decode, dequantize, reconstruct.
-  // AGENTS.MD §Coordinator: apply 1/n FedAvg scalar post-decryption.
-  const dequantized = dequantizeChunks(chunks, config.numClients, scaleFactor, plaintextModulus);
+  // 6-8. Decode, dequantize, reconstruct using bitplane decoding.
+  const flatCoefficients = chunks.flat();
+  const dequantized = weftClient.dequantizeGradients(
+    flatCoefficients,
+    config.numClients,
+    scaleFactor,
+  );
   const aggregatedGradients = dequantized.slice(0, globalWeights.length);
 
   // 9. AGENTS.MD §Coordinator / Model update.
@@ -150,11 +155,20 @@ export function decodeOutput(
   return chunks;
 }
 
+/**
+ * Dequantize bitplane-encoded chunks back to float gradients.
+ *
+ * With bitplane encoding, the coefficients are tally values (not signed gradient
+ * sums). We flatten all chunks, then use the client SDK's dequantizeGradients
+ * which handles the bitplane math (weighted sum → offset removal → division).
+ *
+ * No two's-complement unwrap is needed: tally values are always non-negative.
+ */
 export function dequantizeChunks(
   chunks: bigint[][],
   numClients: number,
   scaleFactor: number,
-  plaintextModulus: bigint,
+  _plaintextModulus: bigint,
 ): Float32Array {
   if (numClients <= 0) {
     throw new Error("numClients must be greater than zero");
@@ -163,24 +177,8 @@ export function dequantizeChunks(
     throw new Error("scaleFactor must be greater than zero");
   }
 
-  const halfModulus = plaintextModulus / 2n;
-  const divisor = numClients * scaleFactor;
-  const gradients = new Float32Array(countValues(chunks));
-
-  let index = 0;
-  for (const chunk of chunks) {
-    for (const rawValue of chunk) {
-      let value = rawValue;
-      if (value > halfModulus) {
-        value -= plaintextModulus;
-      }
-
-      gradients[index] = Number(value) / divisor;
-      index += 1;
-    }
-  }
-
-  return gradients;
+  const flatCoefficients = chunks.flat();
+  return weftClient.dequantizeGradients(flatCoefficients, numClients, scaleFactor);
 }
 
 function decodePlaintextChunk(chunkBytes: Uint8Array): bigint[] {
