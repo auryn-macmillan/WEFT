@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 // AGENTS.MD: BFV Parameter Specification / Application-Level Constants
 //
-// Bitplane tally encoding: the overflow constraint shifts from
-//   n_max × S × G < t/2   (standard)
-// to:
-//   n_max < t/2            (bitplane)
+// Standard coefficient encoding: one BFV coefficient per gradient integer.
+// Overflow constraint: n_max × S × G < t / 2
 
 /// Fixed-point scale factor: gradient_int = round(grad_float * SCALE_FACTOR)
 ///
-/// With bitplane tally encoding, SCALE_FACTOR no longer participates in the
-/// overflow constraint. S=4096 gives ±0.000244 precision.
+/// S=4096 gives ±0.000244 precision.
 pub const SCALE_FACTOR: u64 = 4096;
 
 /// Maximum number of participating clients per FL round.
@@ -22,66 +19,67 @@ pub const MAX_GRAD_ABS: f64 = 1.0;
 /// Maximum quantized gradient magnitude as integer: MAX_GRAD_ABS * SCALE_FACTOR.
 pub const MAX_GRAD_INT: u64 = (MAX_GRAD_ABS as u64) * SCALE_FACTOR;
 
-/// Number of bits per gradient in bitplane encoding.
-/// ceil(log2(2 * S * G + 1)) = 14 at S=4096, G=1.0
-pub const BITS_PER_GRADIENT: usize = {
-    let max_unsigned = 2 * SCALE_FACTOR * (MAX_GRAD_ABS as u64);
-    let mut bits = 0u32;
-    let mut val = max_unsigned;
-    while val > 0 {
-        bits += 1;
-        val >>= 1;
-    }
-    bits as usize
-};
-
-/// Number of gradients that fit in one ciphertext with bitplane encoding.
-pub const fn gradients_per_ct(slots: usize) -> usize {
-    slots / BITS_PER_GRADIENT
-}
-
-/// Validate the bitplane overflow safety invariant.
-///
-/// With bitplane encoding, each coefficient holds a tally count (0..numClients),
-/// so the constraint is: numClients < t / 2.
-pub fn validate_overflow_invariant(plaintext_modulus: u64, num_clients: u32) {
-    let half_t = plaintext_modulus / 2;
-    assert!(
-        (num_clients as u64) < half_t,
-        "Bitplane overflow invariant violated: num_clients={} >= t/2={}. \
-         With bitplane tally encoding, max clients = t/2 - 1 = {}.",
-        num_clients,
-        half_t,
-        half_t - 1,
-    );
-}
-
 /// Default number of polynomial coefficients per ciphertext (ring dimension).
 pub const DEFAULT_SLOTS_PER_CT: usize = 8192;
 
-/// Bitplane-encode a single gradient into B coefficient values.
+/// Validate the standard overflow safety invariant.
 ///
-/// Returns a Vec of 0/1 values, one per bit position.
-pub fn encode_bitplane(gradient: f64) -> Vec<u64> {
-    let clamped = gradient.max(-MAX_GRAD_ABS).min(MAX_GRAD_ABS);
-    let scaled = (clamped * SCALE_FACTOR as f64).round() as i64;
-    let unsigned = (scaled + (SCALE_FACTOR as f64 * MAX_GRAD_ABS) as i64) as u64;
-    let mut bits = Vec::with_capacity(BITS_PER_GRADIENT);
-    for b in 0..BITS_PER_GRADIENT {
-        bits.push((unsigned >> b) & 1);
-    }
-    bits
+/// AGENTS.MD §Overflow Safety Invariant:
+///   n_max × MAX_GRAD_INT < t / 2
+///
+/// where MAX_GRAD_INT = S × G (already computed).
+pub fn validate_overflow_invariant(plaintext_modulus: u64, num_clients: u32) {
+    let half_t = plaintext_modulus / 2;
+    let max_sum = (num_clients as u64) * MAX_GRAD_INT;
+    assert!(
+        max_sum < half_t,
+        "Overflow invariant violated: num_clients({}) × MAX_GRAD_INT({}) = {} >= t/2={}. \
+         Max clients for t={}: {}.",
+        num_clients,
+        MAX_GRAD_INT,
+        max_sum,
+        half_t,
+        plaintext_modulus,
+        (half_t - 1) / MAX_GRAD_INT,
+    );
 }
 
-/// Decode bitplane tallies back to a float gradient.
-pub fn decode_bitplane(tallies: &[u64], num_clients: u64) -> f64 {
-    let mut weighted_sum: i64 = 0;
-    for (b, &tally) in tallies.iter().enumerate() {
-        weighted_sum += (tally as i64) * (1i64 << b);
+/// Quantize a floating-point gradient to an integer.
+///
+/// Clamps to [-G, G], multiplies by S, rounds to nearest integer.
+pub fn quantize_gradient(grad: f64) -> i64 {
+    let clamped = grad.max(-MAX_GRAD_ABS).min(MAX_GRAD_ABS);
+    (clamped * SCALE_FACTOR as f64).round() as i64
+}
+
+/// Dequantize an integer gradient sum back to a float.
+///
+/// Divides by (num_clients × S) to recover the averaged gradient.
+pub fn dequantize_gradient(val: i64, num_clients: u64) -> f64 {
+    val as f64 / (num_clients as f64 * SCALE_FACTOR as f64)
+}
+
+/// Encode a gradient integer as a BFV coefficient using two's complement mod t.
+///
+/// AGENTS.MD §Gradient Encoding: "Represent negatives as t - |grad_int|"
+pub fn encode_coefficient(grad_int: i64, plaintext_modulus: u64) -> u64 {
+    if grad_int >= 0 {
+        grad_int as u64
+    } else {
+        plaintext_modulus - (grad_int.unsigned_abs())
     }
-    let offset_removed =
-        weighted_sum - (num_clients as i64) * (SCALE_FACTOR as i64) * (MAX_GRAD_ABS as i64);
-    offset_removed as f64 / (num_clients as f64 * SCALE_FACTOR as f64)
+}
+
+/// Decode a BFV coefficient back to a signed integer using two's complement mod t.
+///
+/// AGENTS.MD §Negative Number Handling: "if val > t/2, val = val - t"
+pub fn decode_coefficient(coeff: u64, plaintext_modulus: u64) -> i64 {
+    let half_t = plaintext_modulus / 2;
+    if coeff > half_t {
+        coeff as i64 - plaintext_modulus as i64
+    } else {
+        coeff as i64
+    }
 }
 
 #[cfg(test)]
@@ -90,18 +88,18 @@ mod tests {
 
     #[test]
     fn overflow_invariant_holds_for_demo_params() {
-        validate_overflow_invariant(100, MAX_CLIENTS);
+        validate_overflow_invariant(131072, MAX_CLIENTS);
     }
 
     #[test]
-    #[should_panic(expected = "Bitplane overflow invariant violated")]
-    fn overflow_invariant_rejects_when_clients_exceed_half_t() {
-        validate_overflow_invariant(100, 50);
+    #[should_panic(expected = "Overflow invariant violated")]
+    fn overflow_invariant_rejects_when_too_many_clients() {
+        validate_overflow_invariant(131072, 16);
     }
 
     #[test]
-    fn bits_per_gradient_is_14() {
-        assert_eq!(BITS_PER_GRADIENT, 14);
+    fn overflow_invariant_passes_at_boundary() {
+        validate_overflow_invariant(131072, 15);
     }
 
     #[test]
@@ -110,52 +108,81 @@ mod tests {
     }
 
     #[test]
+    fn quantize_positive() {
+        assert_eq!(quantize_gradient(0.5), 2048);
+    }
+
+    #[test]
+    fn quantize_negative() {
+        assert_eq!(quantize_gradient(-0.5), -2048);
+    }
+
+    #[test]
+    fn quantize_clamps() {
+        assert_eq!(quantize_gradient(5.0), 4096);
+        assert_eq!(quantize_gradient(-5.0), -4096);
+    }
+
+    #[test]
+    fn quantize_zero() {
+        assert_eq!(quantize_gradient(0.0), 0);
+    }
+
+    #[test]
+    fn encode_positive_coefficient() {
+        assert_eq!(encode_coefficient(2048, 131072), 2048);
+    }
+
+    #[test]
+    fn encode_negative_coefficient() {
+        assert_eq!(encode_coefficient(-2048, 131072), 129024);
+    }
+
+    #[test]
+    fn decode_positive_coefficient() {
+        assert_eq!(decode_coefficient(2048, 131072), 2048);
+    }
+
+    #[test]
+    fn decode_negative_coefficient() {
+        assert_eq!(decode_coefficient(129024, 131072), -2048);
+    }
+
+    #[test]
     fn encode_decode_round_trips() {
+        let t = 131072u64;
         for &grad in &[0.75, -0.5, 0.0, 1.0, -1.0, 0.001] {
-            let bits = encode_bitplane(grad);
-            let decoded = decode_bitplane(&bits, 1);
+            let q = quantize_gradient(grad);
+            let encoded = encode_coefficient(q, t);
+            let decoded = decode_coefficient(encoded, t);
+            assert_eq!(decoded, q, "Round-trip failed for {grad}");
+            let recovered = dequantize_gradient(decoded, 1);
             let tolerance = 1.0 / SCALE_FACTOR as f64 + 1e-10;
             assert!(
-                (decoded - grad).abs() <= tolerance,
-                "Round-trip failed for {grad}: got {decoded}"
+                (recovered - grad).abs() <= tolerance,
+                "Float round-trip failed for {grad}: got {recovered}"
             );
         }
     }
 
     #[test]
-    fn encode_zero_gives_offset() {
-        let bits = encode_bitplane(0.0);
-        let mut reconstructed: u64 = 0;
-        for (b, &bit) in bits.iter().enumerate() {
-            reconstructed += bit << b;
-        }
-        assert_eq!(reconstructed, SCALE_FACTOR);
-    }
-
-    #[test]
-    fn encode_neg_one_gives_zero() {
-        let bits = encode_bitplane(-1.0);
-        assert!(bits.iter().all(|&b| b == 0));
-    }
-
-    #[test]
     fn three_client_sum_decodes_correctly() {
-        let gradients = vec![0.75, -0.5, 0.25];
-        let client_bits: Vec<Vec<u64>> = gradients.iter().map(|&g| encode_bitplane(g)).collect();
+        let t = 131072u64;
+        let _gradients = vec![0.75, -0.5, 0.25];
 
-        let mut tallies = vec![0u64; BITS_PER_GRADIENT];
-        for bits in &client_bits {
-            for (b, &bit) in bits.iter().enumerate() {
-                tallies[b] += bit;
-            }
-        }
+        let client_grads = [0.75f64, -0.5, 0.25];
+        let sum_coeff: u64 = client_grads
+            .iter()
+            .map(|&g| encode_coefficient(quantize_gradient(g), t))
+            .fold(0u64, |acc, c| (acc + c) % t);
 
-        let decoded = decode_bitplane(&tallies, 3);
-        let expected: f64 = gradients.iter().sum::<f64>() / 3.0;
+        let decoded = decode_coefficient(sum_coeff, t);
+        let avg = dequantize_gradient(decoded, 3);
+        let expected: f64 = client_grads.iter().sum::<f64>() / 3.0;
         let tolerance = 1.0 / SCALE_FACTOR as f64 + 1e-10;
         assert!(
-            (decoded - expected).abs() <= tolerance,
-            "3-client decode failed: expected {expected}, got {decoded}"
+            (avg - expected).abs() <= tolerance,
+            "3-client decode failed: expected {expected}, got {avg}"
         );
     }
 }
