@@ -53,7 +53,7 @@ updates the global model. No plaintext gradients are ever visible to any single 
 ## BFV Parameters
 
 WEFT currently documents and tests a **demo configuration** that assumes the Interfold BFV presets
-resolve to a plaintext modulus of **t = 100** in the local development environment used for this
+resolve to a plaintext modulus of **t = 131,072** in the local development environment used for this
 repository.
 
 This value is treated as a checked demo assumption in the current codebase, not a verified,
@@ -67,57 +67,54 @@ from the upstream source of truth rather than relying on this README.
 | `SCALE_FACTOR` (S) | 4096 | Fixed-point quantization: `grad_int = round(grad × S)`. Precision ≈ ±0.000244. |
 | `MAX_CLIENTS` (n_max) | 10 | Maximum participants per round |
 | `MAX_GRAD_ABS` (G) | 1.0 | Gradient clamp range `[-G, G]` |
-| `BITS_PER_GRADIENT` (B) | 14 | `ceil(log2(2 × S × G + 1))` — bits per gradient in bitplane encoding |
-| `GRADIENTS_PER_CT` | 585 | `floor(N / B)` — gradients that fit in one ciphertext |
-| `SLOTS_PER_CT` (N) | 8192 / 512 | Ring dimension (secure / insecure preset) |
+| `MAX_GRAD_INT` | 4096 | `MAX_GRAD_ABS × SCALE_FACTOR` |
+| `SLOTS_PER_CT` (N) | 8192 / 512 | gradients per ciphertext = SLOTS_PER_CT (one coefficient per gradient) |
 
-### Bitplane Tally Encoding
+### Standard Coefficient Encoding
 
-Standard BFV coefficient encoding stores one integer per coefficient, making the overflow invariant
-`n_max × S × G < t / 2`. With `t = 100`, this limits precision to `S ≈ 4` — far too coarse for
-real gradient values.
+Standard BFV coefficient encoding stores one integer per coefficient. Negative gradients are
+represented using two's complement modulo `t`: positive `x → x`, negative `-x → t - x`.
 
-**Bitplane tally encoding** decomposes each gradient into `B` individual bit coefficients. After
-homomorphic addition across `n` clients, each coefficient holds a tally count (0 to n) rather than
-a large accumulated integer. This shifts the overflow constraint to simply:
-
-```
-n_max < t / 2
-```
-
-Precision (`S`) and gradient range (`G`) drop out entirely. With `t = 100`, we support up to 49
-clients at **any** precision — WEFT uses `S = 4096` for 1024× better precision than the naive
-approach.
+After homomorphic summation of `n` clients, each coefficient holds the sum of quantized gradients.
+This shifts the overflow constraint to ensuring the sum does not wrap around `t/2`.
 
 #### Encoding/Decoding Flow
 
 ```
 Encode (client-side):
-  gradient ∈ [-G, G] → clamp → scaled = round(grad × S) → unsigned = scaled + S×G
-  → decompose into B bits: coefficient[b] = (unsigned >> b) & 1
+  gradient ∈ [-G, G] → clamp → scaled = round(grad × S)
+  → two's complement mod t: if scaled < 0 then scaled + t else scaled
 
 Homomorphic sum (secure process — unchanged):
   coefficient-wise addition across all clients
-  → each coefficient becomes a tally: how many clients had bit b = 1
+  → each coefficient holds the accumulated sum of quantized gradients
 
 Decode (coordinator-side):
-  weightedSum = Σ_b (tally[b] × 2^b)
-  average = (weightedSum − n × S × G) / (n × S)
+  if val > t/2 then val = val - t
+  average = val / (n × S)
 ```
+
+With `t = 131,072`, `S = 4096`, and `G = 1.0`, the system supports up to `floor((t/2 - 1) / (S × G)) = 15` clients.
 
 ### Overflow Safety Invariant
 
-With bitplane tally encoding, each BFV coefficient holds a tally count (0 to n), so the constraint
-is simply that the tally fits in `Z_t` without ambiguity:
+The sum of quantized gradients must fit in `Z_t` without ambiguity. The invariant is:
 
 ```
-n_max < t / 2
-10 < 50 ✓
+n_max × S × G < t / 2
 ```
 
-This invariant is enforced at runtime in Rust (`validate_overflow_invariant`) and checked in
-Solidity (`FLAggregator.validate`). The demo assumes `t = 100` — full Interfold integration should
-read the active preset value from the upstream source of truth.
+or equivalently:
+
+```
+n_max × MAX_GRAD_INT < t / 2
+10 × 4096 = 40,960 < 65,536 ✓
+```
+
+The maximum number of clients supported with these parameters is 15. This invariant is enforced at
+runtime in Rust (`validate_overflow_invariant`) and checked in Solidity (`FLAggregator.validate`).
+The demo assumes `t = 131,072` — full Interfold integration should read the active preset value from
+the upstream source of truth.
 
 ## How It Works
 
@@ -139,21 +136,20 @@ read the active preset value from the upstream source of truth.
 
 1. **Coordinator** requests a new E3 round via `Enclave.request()`.
 2. **Enclave** activates the round; ciphernode committee publishes a threshold BFV public key.
-3. **Clients** clamp and quantize their gradient vectors, bitplane-encode each gradient into `B`
-   bit-coefficients, encrypt the coefficient vector under the public key, and submit via
+3. **Clients** clamp and quantize their gradient vectors, encode as two's complement coefficients,
+   encrypt the coefficient vector under the public key, and submit via
    `FLAggregator.publishInput()`.
 4. **Secure Process** (RISC Zero guest) homomorphically sums all ciphertexts per chunk index.
-   Each coefficient becomes a tally of how many clients had that bit set.
+   Each coefficient holds the accumulated sum of quantized gradients.
 5. **Ciphernode committee** threshold-decrypts the aggregated ciphertext.
-6. **Coordinator** decodes the plaintext tallies, reconstructs the weighted bit-sums, removes the
-   unsigned offset, divides by `n × S` (FedAvg scalar), and updates the global model weights.
+6. **Coordinator** decodes the plaintext coefficients via two's complement unwrap,
+   divides by `n × S` (FedAvg scalar), and updates the global model weights.
 
 ### Negative Gradient Encoding
 
-Bitplane encoding uses an **unsigned offset** representation: `unsigned = scaled + S × G`, which
-maps the range `[-S×G, +S×G]` to `[0, 2×S×G]`. All values are non-negative, so no two's-complement
-unwrap is needed after decryption. The coordinator removes the offset during decoding:
-`weightedSum − n × S × G`.
+Negative gradients use **two's complement modulo t**. For a plaintext modulus `t`, a value `-x` is
+represented as `t - x`. The coordinator performs the unwrap after decryption: if `val > t/2`,
+then `val = val - t`.
 
 ### Division is NOT Homomorphic
 
@@ -180,13 +176,13 @@ without exposing any patient data**. They walk through each phase with narrated 
 show what an attacker would see (encrypted gibberish), and reveal that only the aggregate — never
 individual contributions — is decrypted.
 
-**Simulation demo** (`scripts/run-round.ts`) — runs instantly, no Rust needed. Simulates the
-bitplane tally encoding pipeline with plaintext integer arithmetic that mirrors BFV's behavior.
-Best for quick presentations.
+**Simulation demo** (`scripts/run-round.ts`) — runs instantly, no Node-Rust bindings needed.
+Simulates the coefficient encoding pipeline with plaintext integer arithmetic that mirrors BFV's
+behavior. Best for quick presentations.
 
 **Encrypted demo** (`secure-process/examples/threshold_demo.rs`) — uses real BFV homomorphic
 encryption with threshold key generation (5 committee members, need 3 to decrypt), real
-ciphertext addition over bitplane-encoded gradients, and real Shamir-based threshold decryption.
+ciphertext addition over standard encoded gradients, and real Shamir-based threshold decryption.
 Takes a few seconds to run. Best for demonstrating that the cryptography actually works.
 
 ```bash
@@ -200,11 +196,11 @@ forge test --root contracts  # requires Foundry
 
 ### Secure Process (`secure-process/tests/integration.rs`)
 
-- Single-chunk and multi-chunk homomorphic summation with bitplane-encoded gradients
-- Negative gradient values (unsigned offset encoding round-trip)
+- Single-chunk and multi-chunk homomorphic summation with standard coefficient encoding
+- Negative gradient values (two's complement mod t round-trip)
 - Zero gradients
 - Output framing format verification
-- Bitplane encode/decode helpers and overflow invariant
+- Encode/decode helpers and overflow invariant
 
 ### Solidity (`contracts/test/FLAggregator.t.sol`)
 
@@ -214,13 +210,13 @@ forge test --root contracts  # requires Foundry
 
 ### Client SDK (`client/tests/encrypt.test.ts`)
 
-- Bitplane encode / decode round-trip (single bit positions, full gradient)
+- Coefficient encode / decode round-trip (positive and negative values)
 - Quantize / dequantize round-trip at S=4096
-- Multi-client bitplane aggregation simulation (3 clients, tally summation)
-- Negative gradient round-trip through unsigned offset arithmetic
+- Multi-client aggregation simulation (3 clients, sum of coefficients)
+- Negative gradient round-trip through two's complement modulo t arithmetic
 - Gradient clamping to `[-G, G]`
 - Chunk splitting with zero-padding
-- Bitplane overflow invariant validation (`n_max < t/2`)
+- Overflow invariant validation (`n_max * MAX_GRAD_INT < t/2`)
 
 ## Out of Scope (v1)
 
