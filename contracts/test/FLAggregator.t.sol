@@ -72,7 +72,8 @@ contract FLAggregatorTest is Test {
   }
 
   function testValidateRejectsOverflowInvariantViolation() external {
-    bytes memory params = _roundParams(100, 1, 100, 100, address(this));
+    // numClients=100, maxGradInt=700 → 100 × 700 = 70000 >= 131072/2 = 65536
+    bytes memory params = _roundParams(100, 1, 100, 700, address(this));
 
     vm.expectRevert(FLAggregator.OverflowInvariantViolated.selector);
     aggregator.validate(E3_ID, 0, params, "", "");

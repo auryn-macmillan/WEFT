@@ -17,7 +17,7 @@ contract FLAggregator is IE3Program, Ownable {
   }
 
   bytes32 public constant ENCRYPTION_SCHEME_ID = keccak256("fhe.rs:BFV");
-  uint256 public constant PLAINTEXT_MOD = 100;
+  uint256 public constant PLAINTEXT_MOD = 131072;
 
   IEnclave public enclave;
   IRiscZeroVerifier public risc0Verifier;
@@ -77,10 +77,8 @@ contract FLAggregator is IE3Program, Ownable {
     if (scaleFactor == 0) revert InvalidScaleFactor();
     if (coordinator == address(0)) revert InvalidCoordinator();
 
-    // AGENTS.MD §Overflow Safety Invariant (bitplane tally encoding)
-    // With bitplane encoding, each BFV coefficient holds a tally count (0..numClients),
-    // so the constraint is simply: numClients < t / 2.
-    if (uint256(numClients) >= PLAINTEXT_MOD / 2) {
+    // AGENTS.MD §Overflow Safety Invariant: n × maxGradInt < t/2
+    if (uint256(numClients) * uint256(maxGradInt) >= PLAINTEXT_MOD / 2) {
       revert OverflowInvariantViolated();
     }
 
