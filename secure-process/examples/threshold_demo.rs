@@ -3,7 +3,7 @@
 // WEFT Encrypted Demo — "Three Hospitals, Real Encryption, Zero Data Leaks"
 //
 // A narrated walkthrough of privacy-preserving federated learning with REAL
-// threshold BFV encryption and bitplane tally encoding. Unlike the TypeScript
+// threshold BFV encryption and standard coefficient encoding. Unlike the TypeScript
 // simulation, this demo actually encrypts, sums ciphertexts homomorphically,
 // and threshold-decrypts.
 //
@@ -21,7 +21,8 @@ use rand::rngs::OsRng;
 use rand::thread_rng;
 
 use weft_secure_process::constants::{
-    decode_bitplane, encode_bitplane, BITS_PER_GRADIENT, MAX_GRAD_ABS, SCALE_FACTOR,
+    decode_coefficient, dequantize_gradient, encode_coefficient, quantize_gradient, MAX_GRAD_ABS,
+    SCALE_FACTOR,
 };
 
 const MAX_CLIENTS: u32 = 10;
@@ -35,19 +36,13 @@ const LEARNING_RATE: f64 = 0.01;
 // Statistical security param for smudging noise (80 for demo; production uses 128+)
 const LAMBDA: usize = 80;
 
-const PLAINTEXT_MODULUS: u64 = 100;
+const PLAINTEXT_MODULUS: u64 = 131072;
 const DEGREE: usize = 8192;
-// Ciphertext moduli from fhe.rs trbfv_add.rs reference (4 moduli for degree=8192)
-const MODULI: &[u64] = &[
-    0x00800000022a0001,
-    0x00800000021a0001,
-    0x0080000002120001,
-    0x0080000001f60001,
-];
+// Ciphertext moduli (3 moduli for degree=8192)
+const MODULI: &[u64] = &[0x0400000001460001, 0x0400000000ea0001, 0x0400000000920001];
 const VARIANCE: usize = 10;
-// Error1 variance for smudging noise compatibility (from trbfv_add.rs)
-const ERROR1_VARIANCE_STR: &str =
-    "52309181128222339698631578526730685514457152477762943514050560000";
+// Error1 variance for smudging noise compatibility
+const ERROR1_VARIANCE_STR: &str = "2331171231419734472395201298275918858425592709120";
 
 // ANSI terminal colors
 const RESET: &str = "\x1b[0m";
@@ -146,11 +141,13 @@ fn format_floats(vals: &[f64], count: usize) -> String {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut rng = thread_rng();
 
-    // Bitplane overflow safety invariant: n_max < t / 2
+    // Standard coefficient overflow safety invariant: n_max × S × G < t / 2
+    // AGENTS.MD §Overflow Safety Invariant
     let half_t = PLAINTEXT_MODULUS / 2;
+    let max_sum = (MAX_CLIENTS as u64) * SCALE_FACTOR;
     assert!(
-        (MAX_CLIENTS as u64) < half_t,
-        "Bitplane overflow invariant violated: {MAX_CLIENTS} >= t/2 = {half_t}"
+        max_sum < half_t,
+        "Overflow invariant violated: {MAX_CLIENTS} × S({SCALE_FACTOR}) = {max_sum} >= t/2 = {half_t}"
     );
 
     // =========================================================================
@@ -174,16 +171,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     narrate("  • Real homomorphic addition of ciphertexts");
     narrate("  • Real threshold decryption with Shamir secret sharing");
     narrate(&format!(
-        "  • Bitplane tally encoding: {BITS_PER_GRADIENT} bits/gradient, S={SCALE_FACTOR}"
+        "  • Standard coefficient encoding: one coefficient per gradient, S={SCALE_FACTOR}"
     ));
     println!();
     println!(
         "{DIM}  Technical: degree={DEGREE} · t={PLAINTEXT_MODULUS} · S={SCALE_FACTOR} · \
-         {BITS_PER_GRADIENT} bits/grad · {GRADIENT_SIZE} params · λ={LAMBDA} · {NUM_PARTIES} committee members{RESET}"
+         {GRADIENT_SIZE} params · λ={LAMBDA} · {NUM_PARTIES} committee members{RESET}"
     );
-    println!(
-        "{DIM}  Overflow:  n_max < t/2 = {half_t} ({NUM_CLIENTS} clients ✓) — precision decoupled from t{RESET}"
-    );
+    println!("{DIM}  Overflow:  n_max × S < t/2 = {half_t} ({NUM_CLIENTS} clients ✓){RESET}");
     println!();
 
     // =========================================================================
@@ -222,8 +217,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     narrate("  3. Generates smudging noise (protects against partial leakage)");
     println!("  │");
 
-    let total_coefficients = GRADIENT_SIZE * BITS_PER_GRADIENT;
-    let num_chunks = (total_coefficients + DEGREE - 1) / DEGREE;
+    // Standard coefficient encoding: one coefficient per gradient
+    let total_coefficients = GRADIENT_SIZE;
+    let num_chunks = (GRADIENT_SIZE + DEGREE - 1) / DEGREE;
 
     let crp = CommonRandomPoly::new(&params_builder()?, &mut rng)?;
     let params = params_builder()?;
@@ -338,19 +334,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     phase_end();
 
     // =========================================================================
-    // PHASE 5 — Local training + encryption (bitplane)
+    // PHASE 5 — Local training + encryption (standard coefficient encoding)
     // =========================================================================
 
-    phase(5, 8, "Local Training & Bitplane Encryption");
+    phase(5, 8, "Local Training & Standard Coefficient Encryption");
     narrate("Each hospital trains on its private patient data, then encodes");
-    narrate("gradients using bitplane tally encoding:");
+    narrate("gradients using standard two's complement coefficient encoding:");
     narrate(&format!(
-        "  1. Scale (×{SCALE_FACTOR}) and offset each gradient to unsigned"
+        "  1. Clamp each gradient to [-{MAX_GRAD_ABS}, {MAX_GRAD_ABS}]"
     ));
     narrate(&format!(
-        "  2. Decompose into {BITS_PER_GRADIENT} individual bits"
+        "  2. Quantize: grad_int = round(grad × S={SCALE_FACTOR})"
     ));
-    narrate("  3. Each bit becomes one BFV polynomial coefficient (0 or 1)");
+    narrate("  3. Encode: negative values stored as t - |grad_int| (two's complement mod t)");
     narrate("  4. Encrypt the coefficient vector under the threshold public key");
     println!("  │");
 
@@ -365,14 +361,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
         .collect();
 
-    // Plaintext shadow for later verification: element-wise sum of bitplane coefficients
+    // Plaintext shadow for later verification: element-wise sum of encoded coefficients mod t
+    // AGENTS.MD §Standard coefficient encoding
     let mut shadow_sum = vec![0u64; total_coefficients];
     for c in 0..NUM_CLIENTS {
         for i in 0..GRADIENT_SIZE {
-            let bits = encode_bitplane(client_gradients[c][i]);
-            for (b, &bit) in bits.iter().enumerate() {
-                shadow_sum[i * BITS_PER_GRADIENT + b] += bit;
-            }
+            let grad_int = quantize_gradient(client_gradients[c][i]);
+            let encoded = encode_coefficient(grad_int, PLAINTEXT_MODULUS);
+            shadow_sum[i] = (shadow_sum[i] + encoded) % PLAINTEXT_MODULUS;
         }
     }
 
@@ -386,11 +382,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut all_ciphertexts: Vec<Vec<Ciphertext>> = Vec::new();
 
     for (c, client_grads) in client_gradients.iter().enumerate() {
-        // Bitplane-encode all gradients into a flat coefficient array
+        // Standard coefficient encoding: one coefficient per gradient
         let mut all_coeffs: Vec<u64> = Vec::with_capacity(total_coefficients);
         for i in 0..GRADIENT_SIZE {
-            let bits = encode_bitplane(client_grads[i]);
-            all_coeffs.extend_from_slice(&bits);
+            let grad_int = quantize_gradient(client_grads[i]);
+            let encoded = encode_coefficient(grad_int, PLAINTEXT_MODULUS);
+            all_coeffs.push(encoded);
         }
 
         // Split into chunks of DEGREE and encrypt each
@@ -416,13 +413,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "Private gradients: ",
             &format!("[{}]", format_floats(&client_grads[..4], 4)),
         );
-        let bit_preview: String = encode_bitplane(client_grads[0])
-            .iter()
-            .map(|b| b.to_string())
-            .collect();
+        let grad0_int = quantize_gradient(client_grads[0]);
+        let grad0_encoded = encode_coefficient(grad0_int, PLAINTEXT_MODULUS);
         data_line(
-            "Bitplane (grad₀): ",
-            &format!("[{bit_preview}] ({BITS_PER_GRADIENT} bits)"),
+            "Coefficient (grad₀):",
+            &format!("grad_int={grad0_int} → encoded={grad0_encoded} (two's complement mod t)"),
         );
         attacker_sees("Encrypted (on wire):", &fake_encrypted_hex(48));
         println!("  │");
@@ -443,13 +438,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     phase(6, 8, "Homomorphic Aggregation (Math on Ciphertext)");
     narrate("The ciphertexts are ADDED TOGETHER without decrypting them.");
-    narrate("Each BFV coefficient holds a single bit (0 or 1). After adding");
+    narrate("Each BFV coefficient holds one encoded gradient integer. After adding");
     narrate(&format!(
-        "{NUM_CLIENTS} clients' ciphertexts, each coefficient becomes a tally (0..{NUM_CLIENTS})."
+        "{NUM_CLIENTS} clients' ciphertexts, each coefficient holds the gradient sum (mod t)."
     ));
     println!("  │");
     narrate(&format!(
-        "{BOLD}Encrypt(bits_A) + Encrypt(bits_B) = Encrypt(tallies_A+B){RESET}"
+        "{BOLD}Encrypt(coeff_A) + Encrypt(coeff_B) = Encrypt(coeff_A + coeff_B){RESET}"
     ));
     println!("  │");
 
@@ -466,7 +461,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  │");
     narrate("Nobody can read this — not the coordinator, not any single committee");
     narrate("member, not an attacker. It contains the SUM of all hospitals'");
-    narrate("encrypted bit-coefficients, but extracting individual contributions");
+    narrate("encoded gradient coefficients, but extracting individual contributions");
     narrate("is computationally infeasible.");
     success(&format!("Homomorphic sum computed ({num_chunks} chunks)."));
     phase_end();
@@ -520,17 +515,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         decrypted_coeffs.push(values);
     }
 
-    narrate("After decryption, the coordinator decodes the bitplane tallies:");
+    narrate("After decryption, the coordinator decodes the standard coefficients:");
+    narrate("  1. Each coefficient is the sum of all client gradient integers (mod t)");
+    narrate("  2. Two's complement unwrap: if coeff > t/2, value = coeff - t (negative)");
     narrate(&format!(
-        "  1. Group every {BITS_PER_GRADIENT} tally values → one gradient"
-    ));
-    narrate("  2. Weighted sum: Σ(tally[b] × 2ᵇ) → aggregate integer");
-    narrate(&format!(
-        "  3. Remove offset: subtract n × S × G = {} × {} × {}",
-        NUM_CLIENTS, SCALE_FACTOR, MAX_GRAD_ABS as u64
-    ));
-    narrate(&format!(
-        "  4. Divide by n × S = {} to get the average",
+        "  3. Divide by n × S = {} × {} = {} to get the average",
+        NUM_CLIENTS,
+        SCALE_FACTOR,
         NUM_CLIENTS as u64 * SCALE_FACTOR
     ));
     println!("  │");
@@ -560,12 +551,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // Decode bitplane tallies to float gradients
+    // Decode standard coefficients: two's complement unwrap, then dequantize
+    // AGENTS.MD §Negative Number Handling
     let mut recovered = vec![0.0f64; GRADIENT_SIZE];
-    for g in 0..GRADIENT_SIZE {
-        let offset = g * BITS_PER_GRADIENT;
-        let tallies = &flat_coeffs[offset..offset + BITS_PER_GRADIENT];
-        recovered[g] = decode_bitplane(tallies, NUM_CLIENTS as u64);
+    for i in 0..GRADIENT_SIZE {
+        let signed = decode_coefficient(flat_coeffs[i], PLAINTEXT_MODULUS);
+        recovered[i] = dequantize_gradient(signed, NUM_CLIENTS as u64);
     }
 
     for (c, h) in HOSPITALS.iter().enumerate() {
@@ -646,7 +637,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("  {GREEN}✓{RESET} Three hospitals improved a shared model together");
     println!("  {GREEN}✓{RESET} Gradients were encrypted with REAL BFV homomorphic encryption");
-    println!("  {GREEN}✓{RESET} Bitplane encoding: {BITS_PER_GRADIENT} bits/gradient, S={SCALE_FACTOR} (±{precision_bound:.6} precision)");
+    println!("  {GREEN}✓{RESET} Standard coefficient encoding: S={SCALE_FACTOR} (±{precision_bound:.6} precision)");
     println!("  {GREEN}✓{RESET} Ciphertexts were summed — math on encrypted data, no decryption");
     println!(
         "  {GREEN}✓{RESET} Threshold decryption: {}-of-{} committee members cooperated",

@@ -13,13 +13,14 @@ mod tests {
     use rand::thread_rng;
     use std::sync::Arc;
 
-    use weft_secure_process::constants::{
-        decode_bitplane, encode_bitplane, BITS_PER_GRADIENT, SCALE_FACTOR,
-    };
+    use weft_secure_process::constants::{decode_coefficient, encode_coefficient, MAX_GRAD_ABS};
     use weft_secure_process::fhe_processor;
 
     const DEGREE: usize = 512;
+    // Insecure preset has t=100. Standard encoding: n × S × G < t/2 = 50.
+    // With 3 clients and G=1.0, use S=4: 3 × 4 × 1.0 = 12 < 50. ✓
     const PLAINTEXT_MODULUS: u64 = 100;
+    const TEST_SCALE_FACTOR: u64 = 4;
 
     fn test_params() -> Arc<BfvParameters> {
         BfvParametersBuilder::new()
@@ -60,6 +61,21 @@ mod tests {
         chunks
     }
 
+    /// Quantize a gradient with the test scale factor (S=4 to fit within t=100).
+    fn test_quantize(grad: f64) -> i64 {
+        let clamped = grad.max(-MAX_GRAD_ABS).min(MAX_GRAD_ABS);
+        (clamped * TEST_SCALE_FACTOR as f64).round() as i64
+    }
+
+    /// Encode a gradient vector as BFV coefficients using standard two's complement mod t.
+    /// One coefficient per gradient.
+    fn encode_gradient_vector(gradients: &[f64]) -> Vec<u64> {
+        gradients
+            .iter()
+            .map(|&g| encode_coefficient(test_quantize(g), PLAINTEXT_MODULUS))
+            .collect()
+    }
+
     fn encrypt_vector(
         params: &Arc<BfvParameters>,
         public_key: &PublicKey,
@@ -75,24 +91,6 @@ mod tests {
         ciphertext.to_bytes()
     }
 
-    fn bitplane_encode_gradients(gradients: &[f64]) -> Vec<u64> {
-        let mut coeffs = Vec::with_capacity(gradients.len() * BITS_PER_GRADIENT);
-        for &g in gradients {
-            coeffs.extend_from_slice(&encode_bitplane(g));
-        }
-        coeffs
-    }
-
-    fn bitplane_decode_gradients(coeffs: &[u64], num_clients: u64) -> Vec<f64> {
-        let num_gradients = coeffs.len() / BITS_PER_GRADIENT;
-        (0..num_gradients)
-            .map(|g| {
-                let start = g * BITS_PER_GRADIENT;
-                decode_bitplane(&coeffs[start..start + BITS_PER_GRADIENT], num_clients)
-            })
-            .collect()
-    }
-
     fn assert_gradient_avg(recovered: &[f64], client_grads: &[&[f64]], tolerance: f64) {
         let n = client_grads.len() as f64;
         for (i, &val) in recovered.iter().enumerate() {
@@ -105,6 +103,17 @@ mod tests {
         }
     }
 
+    /// Decode aggregated coefficients back to float gradients.
+    /// Standard encoding: decode two's complement, then divide by n × S.
+    fn decode_gradient_vector(coeffs: &[u64], num_gradients: usize, num_clients: u64) -> Vec<f64> {
+        (0..num_gradients)
+            .map(|i| {
+                let signed = decode_coefficient(coeffs[i], PLAINTEXT_MODULUS);
+                signed as f64 / (num_clients as f64 * TEST_SCALE_FACTOR as f64)
+            })
+            .collect()
+    }
+
     #[test]
     fn sums_single_chunk_from_three_clients() {
         let params = test_params();
@@ -113,12 +122,12 @@ mod tests {
         let public_key = PublicKey::new(&secret_key, &mut rng);
 
         let grads_a: &[f64] = &[0.75, -0.5, 0.25];
-        let grads_b: &[f64] = &[-0.3, 0.8, 0.1];
-        let grads_c: &[f64] = &[0.5, -0.1, -0.6];
+        let grads_b: &[f64] = &[-0.25, 0.75, 0.0];
+        let grads_c: &[f64] = &[0.5, -0.25, -0.5];
 
-        let coeffs_a = bitplane_encode_gradients(grads_a);
-        let coeffs_b = bitplane_encode_gradients(grads_b);
-        let coeffs_c = bitplane_encode_gradients(grads_c);
+        let coeffs_a = encode_gradient_vector(grads_a);
+        let coeffs_b = encode_gradient_vector(grads_b);
+        let coeffs_c = encode_gradient_vector(grads_c);
 
         let entries = vec![
             (encrypt_vector(&params, &public_key, &coeffs_a), 0),
@@ -138,10 +147,9 @@ mod tests {
         let plaintext: Plaintext = secret_key.try_decrypt(&ciphertext).unwrap();
         let decoded: Vec<u64> = Vec::<u64>::try_decode(&plaintext, Encoding::poly()).unwrap();
 
-        let num_coeffs = grads_a.len() * BITS_PER_GRADIENT;
-        let recovered = bitplane_decode_gradients(&decoded[..num_coeffs], 3);
+        let recovered = decode_gradient_vector(&decoded, 3, 3);
 
-        let tolerance = 1.0 / SCALE_FACTOR as f64 + 1e-10;
+        let tolerance = 1.0 / TEST_SCALE_FACTOR as f64 + 1e-10;
         assert_gradient_avg(&recovered, &[grads_a, grads_b, grads_c], tolerance);
     }
 
@@ -152,23 +160,24 @@ mod tests {
         let secret_key = SecretKey::random(&params, &mut rng);
         let public_key = PublicKey::new(&secret_key, &mut rng);
 
-        // 40 gradients × 14 bits = 560 coefficients > 512 (DEGREE), so 2 chunks
-        let num_gradients = 40;
+        // 600 gradients > 512 (DEGREE), so 2 chunks with standard encoding
+        let num_gradients = 600;
         let grads_a: Vec<f64> = (0..num_gradients)
-            .map(|i| (i as f64 / 100.0) - 0.2)
+            .map(|i| ((i as f64 / 600.0) - 0.5).max(-1.0).min(1.0))
             .collect();
         let grads_b: Vec<f64> = (0..num_gradients)
-            .map(|i| -(i as f64 / 100.0) + 0.1)
+            .map(|i| (-(i as f64 / 600.0) + 0.3).max(-1.0).min(1.0))
             .collect();
-        let grads_c: Vec<f64> = (0..num_gradients).map(|i| i as f64 / 200.0).collect();
+        let grads_c: Vec<f64> = (0..num_gradients)
+            .map(|i| (i as f64 / 1200.0).max(-1.0).min(1.0))
+            .collect();
 
-        let coeffs_a = bitplane_encode_gradients(&grads_a);
-        let coeffs_b = bitplane_encode_gradients(&grads_b);
-        let coeffs_c = bitplane_encode_gradients(&grads_c);
+        let coeffs_a = encode_gradient_vector(&grads_a);
+        let coeffs_b = encode_gradient_vector(&grads_b);
+        let coeffs_c = encode_gradient_vector(&grads_c);
 
         assert!(coeffs_a.len() > DEGREE, "need >1 chunk for this test");
 
-        // Split each client's coefficients into 2 chunks of DEGREE
         fn split_and_encrypt(
             coeffs: &[u64],
             params: &Arc<BfvParameters>,
@@ -209,10 +218,9 @@ mod tests {
             flat_decoded.extend_from_slice(&vals);
         }
 
-        let num_coeffs = num_gradients * BITS_PER_GRADIENT;
-        let recovered = bitplane_decode_gradients(&flat_decoded[..num_coeffs], 3);
+        let recovered = decode_gradient_vector(&flat_decoded, num_gradients, 3);
 
-        let tolerance = 1.0 / SCALE_FACTOR as f64 + 1e-10;
+        let tolerance = 1.0 / TEST_SCALE_FACTOR as f64 + 1e-10;
         assert_gradient_avg(
             &recovered,
             &[grads_a.as_slice(), grads_b.as_slice(), grads_c.as_slice()],
@@ -221,19 +229,19 @@ mod tests {
     }
 
     #[test]
-    fn preserves_negative_values_via_bitplane_encoding() {
+    fn preserves_negative_values_via_twos_complement() {
         let params = test_params();
         let mut rng = thread_rng();
         let secret_key = SecretKey::random(&params, &mut rng);
         let public_key = PublicKey::new(&secret_key, &mut rng);
 
         let grads_a: &[f64] = &[-0.75, -1.0];
-        let grads_b: &[f64] = &[0.5, 0.3];
-        let grads_c: &[f64] = &[-0.25, 0.7];
+        let grads_b: &[f64] = &[0.5, 0.25];
+        let grads_c: &[f64] = &[-0.25, 0.75];
 
-        let coeffs_a = bitplane_encode_gradients(grads_a);
-        let coeffs_b = bitplane_encode_gradients(grads_b);
-        let coeffs_c = bitplane_encode_gradients(grads_c);
+        let coeffs_a = encode_gradient_vector(grads_a);
+        let coeffs_b = encode_gradient_vector(grads_b);
+        let coeffs_c = encode_gradient_vector(grads_c);
 
         let entries = vec![
             (encrypt_vector(&params, &public_key, &coeffs_a), 0),
@@ -253,13 +261,12 @@ mod tests {
         let pt: Plaintext = secret_key.try_decrypt(&ct).unwrap();
         let decoded: Vec<u64> = Vec::<u64>::try_decode(&pt, Encoding::poly()).unwrap();
 
-        let num_coeffs = grads_a.len() * BITS_PER_GRADIENT;
-        let recovered = bitplane_decode_gradients(&decoded[..num_coeffs], 3);
+        let recovered = decode_gradient_vector(&decoded, 2, 3);
 
-        let tolerance = 1.0 / SCALE_FACTOR as f64 + 1e-10;
+        let tolerance = 1.0 / TEST_SCALE_FACTOR as f64 + 1e-10;
         assert_gradient_avg(&recovered, &[grads_a, grads_b, grads_c], tolerance);
 
-        // Verify the average of grads[1] is (−1.0 + 0.3 + 0.7) / 3 = 0.0
+        // Verify the average of grads[1] is (−1.0 + 0.25 + 0.75) / 3 = 0.0
         assert!(
             recovered[1].abs() <= tolerance,
             "expected ~0.0, got {}",
@@ -283,7 +290,7 @@ mod tests {
         let public_key = PublicKey::new(&secret_key, &mut rng);
 
         let grads: &[f64] = &[0.0, 0.0, 0.0];
-        let coeffs = bitplane_encode_gradients(grads);
+        let coeffs = encode_gradient_vector(grads);
 
         let entries = vec![
             (encrypt_vector(&params, &public_key, &coeffs), 0),
@@ -303,10 +310,9 @@ mod tests {
         let pt: Plaintext = secret_key.try_decrypt(&ct).unwrap();
         let decoded: Vec<u64> = Vec::<u64>::try_decode(&pt, Encoding::poly()).unwrap();
 
-        let num_coeffs = grads.len() * BITS_PER_GRADIENT;
-        let recovered = bitplane_decode_gradients(&decoded[..num_coeffs], 3);
+        let recovered = decode_gradient_vector(&decoded, 3, 3);
 
-        let tolerance = 1.0 / SCALE_FACTOR as f64 + 1e-10;
+        let tolerance = 1.0 / TEST_SCALE_FACTOR as f64 + 1e-10;
         for (i, &val) in recovered.iter().enumerate() {
             assert!(
                 val.abs() <= tolerance,
