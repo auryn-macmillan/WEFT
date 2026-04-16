@@ -33,8 +33,10 @@ const THRESHOLD: usize = 2;
 const NUM_CLIENTS: usize = 3;
 const GRADIENT_SIZE: usize = 512;
 const LEARNING_RATE: f64 = 0.01;
-// Statistical security param for smudging noise (80 for demo; production uses 128+)
-const LAMBDA: usize = 80;
+// Statistical security param for smudging noise.
+// Must be < 80 for demo parameters (degree=8192, 3 moduli) to satisfy
+// the trBFV bound: 2^λ·B_c ≤ (Q/2t - B_c)/n. Upstream tests use 40.
+const LAMBDA: usize = 40;
 
 const PLAINTEXT_MODULUS: u64 = 131072;
 const DEGREE: usize = 8192;
@@ -250,10 +252,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .clone()
             .generate_secret_shares_from_poly(sk_poly, party_rng)?;
 
-        let esi_coeffs =
-            trbfv
-                .clone()
-                .generate_smudging_error(NUM_CLIENTS, LAMBDA, &mut party_rng)?;
+        let esi_coeffs = trbfv
+            .clone()
+            .generate_smudging_error(1, LAMBDA, &mut party_rng)?;
         let esi_poly = share_manager.bigints_to_poly(&esi_coeffs)?;
         let esi_sss = share_manager.generate_secret_shares_from_poly(esi_poly, party_rng)?;
 
