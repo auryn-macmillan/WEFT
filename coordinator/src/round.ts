@@ -5,7 +5,6 @@ import * as weftClient from "@weft/client";
 import { applyGradientUpdate } from "./model.js";
 
 const {
-  BITS_PER_GRADIENT,
   DEFAULT_SLOTS_PER_CT,
   PLAINTEXT_MODULUS,
   SCALE_FACTOR,
@@ -97,12 +96,13 @@ export async function runRound(
   const [, output] = await waitForEvent(enclave, "PlaintextOutputPublished", [e3Id]);
   const chunks = decodeOutput(toUint8Array(output), plaintextModulus);
 
-  // 6-8. Decode, dequantize, reconstruct using bitplane decoding.
+  // 6-8. Decode, dequantize, reconstruct. AGENTS.MD §Negative Number Handling.
   const flatCoefficients = chunks.flat();
   const dequantized = weftClient.dequantizeGradients(
     flatCoefficients,
     config.numClients,
     scaleFactor,
+    plaintextModulus,
   );
   const aggregatedGradients = dequantized.slice(0, globalWeights.length);
 
@@ -156,19 +156,16 @@ export function decodeOutput(
 }
 
 /**
- * Dequantize bitplane-encoded chunks back to float gradients.
+ * Dequantize coefficient-encoded chunks back to float gradients.
  *
- * With bitplane encoding, the coefficients are tally values (not signed gradient
- * sums). We flatten all chunks, then use the client SDK's dequantizeGradients
- * which handles the bitplane math (weighted sum → offset removal → division).
- *
- * No two's-complement unwrap is needed: tally values are always non-negative.
+ * Standard encoding: each coefficient holds a signed gradient sum in two's
+ * complement mod t. Decode via decodeCoefficient, then divide by n × S.
  */
 export function dequantizeChunks(
   chunks: bigint[][],
   numClients: number,
   scaleFactor: number,
-  _plaintextModulus: bigint,
+  plaintextModulus: bigint,
 ): Float32Array {
   if (numClients <= 0) {
     throw new Error("numClients must be greater than zero");
@@ -178,7 +175,7 @@ export function dequantizeChunks(
   }
 
   const flatCoefficients = chunks.flat();
-  return weftClient.dequantizeGradients(flatCoefficients, numClients, scaleFactor);
+  return weftClient.dequantizeGradients(flatCoefficients, numClients, scaleFactor, plaintextModulus);
 }
 
 function decodePlaintextChunk(chunkBytes: Uint8Array): bigint[] {
