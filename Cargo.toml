@@ -1,0 +1,6 @@
+[workspace]
+members = [
+  "secure-process",
+  "examples/weft-web/crates/fhe-wasm",
+]
+resolver = "2"

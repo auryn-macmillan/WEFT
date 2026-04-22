@@ -1,0 +1,4 @@
+packages:
+  - "."
+  - "examples/weft-web"
+  - "examples/weft-web/packages/*"

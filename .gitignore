@@ -1,6 +1,9 @@
 node_modules/
 target/
 dist/
+build/
+.svelte-kit/
+pkg/
 *.tsbuildinfo
 .env
 .env.*
