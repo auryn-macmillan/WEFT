@@ -26,3 +26,24 @@
 - The vendored `fhe-rs` threshold code was already wasm-safe enough once `fhe::lib` re-exported `mbfv`, `trbfv`, and `proto::trbfv`; no extra rayon stripping was needed in this crate because the vendored trbfv path already runs sequentially.
 - For wasm bindings, the cleanest boundary is JSON envelopes plus vendored protobuf helpers: round-1 emits serialized per-recipient share matrices, round-2 returns serialized `(sk_poly, es_poly)` bundles, and partial decrypt / combine reuse `serialize_*` and `deserialize_*` from `fhe::proto::trbfv`.
 - Deterministic parity tests need a deterministic CRP seed shared by all parties and deterministic per-party RNG seeds; below-threshold combine must fail before decryption instead of trying to interpolate with too few shares.
+- Creating local phase stores for sharing global simulated state (`dkgStore`) lets us keep MockCryptoEngine responses around for later phases like public key aggregation without recalculating them on every page load.
+- Avoid passing sensitive simulated bytes to LocalStorage or SessionStorage entirely; a local `writable` Svelte store initialized via `await engine.runDkg(...)` is safer and fits the client-side session model perfectly for the demo.
+- Using staggered CSS animations (`in:fly` with `delay: i * 150`) produces smooth visual storytelling for sharing/combining fragments.
+
+### Phase 1 & 2 implementation
+- Implemented Phase 1 (Meet Participants) and Phase 2 (Distributed Keygen) using `PhaseShell` which wraps the existing `ProgressiveDisclosure` and Phase content structures.
+- Exposed a shared `engine` instance of `MockCryptoEngine` from `$lib/crypto/index.ts`.
+- In SvelteKit, used `goto('/walkthrough/...')` for routing inside the shell.
+- Ensured `onMount` triggers `phaseStore.markVisited` and `advancePhase`.
+- Animated the DKG progress using keyframes and updated `committee-card` classes conditionally to indicate shards generation.
+- Phase 5 implemented utilizing three swimlanes to parallelize fake training and encryption logic, leveraging the MockCryptoEngine and showing Two's Complement math steps directly.
+
+### Phase 8 implementation
+- Used `Array.from` on the decrypted `Int32Array` followed by two's-complement unwrapping logic (`if (val > t/2) val = val - t`) *before* division.
+- Multiplicative factors (`n * S`) were cleanly decoupled to standard Float mapping directly in the JS/TS layer, perfectly aligning with the "division by n is NOT homomorphic" architectural decision.
+- Built a `<RoundSummary>` UI component presenting magnitude metrics alongside explicit "Honest Framing" disclaimers.
+
+### T22: Sandbox mode
+- When implementing reactive parameter controls in Svelte (like threshold picking dependent on committee size), avoid cyclical dependencies in `$:` blocks by updating dependencies sequentially in click handlers and only providing a one-way reactive conversion.
+- BFV invariant validation `numClients * scaleFactor * maxGradAbs < t / 2` should disable "Run round" to prevent silent overflow corruption. Max clients for S=4096 is 15.
+- The `MockCryptoEngine` can be run cleanly synchronously inside `+page.svelte` script tags.
