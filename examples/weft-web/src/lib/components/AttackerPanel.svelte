@@ -106,9 +106,9 @@
   .attacker-panel {
     position: fixed;
     z-index: 50;
-    background-color: var(--color-neutral-900);
+    background-color: var(--color-primary);
     border: 1px solid var(--color-danger);
-    color: var(--color-neutral-100);
+    color: var(--color-text-muted);
     font-family: var(--font-mono);
     display: flex;
     flex-direction: column;
@@ -162,7 +162,7 @@
       top: -48px; /* Stick out above the panel when closed */
       left: 0;
       right: 0;
-      background-color: var(--color-neutral-900);
+      background-color: var(--color-primary);
       border: 1px solid var(--color-danger);
       border-bottom: none;
       border-top-left-radius: var(--radius-lg);
@@ -250,10 +250,10 @@
   .overview {
     padding: var(--space-4);
     font-size: var(--text-xs);
-    color: var(--color-neutral-400);
+    color: var(--color-text-muted);
     font-family: var(--font-sans);
     line-height: var(--leading-relaxed);
-    border-bottom: 1px solid var(--color-neutral-800);
+    border-bottom: 1px solid var(--color-surface);
   }
 
   .event-list {
@@ -263,21 +263,21 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
-    background-color: var(--color-neutral-900);
+    background-color: var(--color-primary);
   }
 
   .event-item {
     font-size: var(--text-xs);
     padding: var(--space-2);
     border-radius: var(--radius-sm);
-    background-color: var(--color-neutral-800);
+    background-color: var(--color-surface);
     border-left: 2px solid var(--color-danger);
   }
 
   .event-meta {
     display: flex;
     justify-content: space-between;
-    color: var(--color-neutral-500);
+    color: var(--color-text-muted);
     margin-bottom: var(--space-1);
     font-size: 10px;
   }
@@ -294,7 +294,7 @@
   }
 
   .hex-preview {
-    color: var(--color-neutral-300);
+    color: var(--color-text-muted);
     word-break: break-all;
     font-size: 11px;
     letter-spacing: 0.05em;
@@ -303,7 +303,7 @@
   .empty-state {
     padding: var(--space-4);
     text-align: center;
-    color: var(--color-neutral-600);
+    color: var(--color-text-muted);
     font-style: italic;
     font-size: var(--text-xs);
   }
@@ -311,7 +311,7 @@
   .footer {
     padding: var(--space-3);
     text-align: center;
-    border-top: 1px solid var(--color-neutral-800);
+    border-top: 1px solid var(--color-surface);
     background-color: rgba(239, 68, 68, 0.05);
   }
 

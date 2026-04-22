@@ -40,8 +40,8 @@
 
 <style>
   .history-panel {
-    background-color: var(--color-neutral-800, #262626);
-    border: 1px solid var(--color-neutral-700, #525252);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-lg, 16px);
     padding: var(--space-6, 24px);
     display: flex;
@@ -53,12 +53,12 @@
   h3 {
     margin: 0;
     font-size: var(--text-xl, 20px);
-    color: var(--color-neutral-100, #fafafa);
+    color: var(--color-primary);
     font-weight: 700;
   }
 
   .empty-state {
-    color: var(--color-neutral-400, #d4d4d4);
+    color: var(--color-text-muted);
     font-size: var(--text-sm, 14px);
     margin: 0;
     font-style: italic;
@@ -75,8 +75,8 @@
   }
 
   .run-item {
-    background-color: var(--color-neutral-900, #0f0f0f);
-    border: 1px solid var(--color-neutral-700, #525252);
+    background-color: var(--color-secondary);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-md, 8px);
     padding: var(--space-3, 12px);
     display: flex;
@@ -89,19 +89,19 @@
     justify-content: space-between;
     align-items: center;
     font-size: var(--text-xs, 12px);
-    color: var(--color-neutral-400, #d4d4d4);
+    color: var(--color-text-muted);
   }
 
   .run-details {
     display: flex;
     gap: var(--space-3, 12px);
     font-size: var(--text-sm, 14px);
-    color: var(--color-neutral-300, #e5e5e5);
+    color: var(--color-text-muted);
     flex-wrap: wrap;
   }
 
   .param {
-    background-color: var(--color-neutral-800, #262626);
+    background-color: var(--color-surface);
     padding: var(--space-1, 4px) var(--space-2, 8px);
     border-radius: var(--radius-sm, 4px);
   }
@@ -112,18 +112,18 @@
     align-items: center;
     margin-top: var(--space-1, 4px);
     padding-top: var(--space-2, 8px);
-    border-top: 1px dashed var(--color-neutral-700, #525252);
+    border-top: 1px dashed var(--color-border);
   }
 
   .run-result .label {
     font-size: var(--text-sm, 14px);
-    color: var(--color-neutral-300, #e5e5e5);
+    color: var(--color-text-muted);
   }
 
   .run-result .value {
     font-size: var(--text-lg, 18px);
     font-family: var(--font-mono, monospace);
     font-weight: 700;
-    color: var(--color-primary, #1a9e8f);
+    color: var(--color-primary);
   }
 </style>

@@ -41,8 +41,8 @@
 
 <style>
   .round-summary {
-    background-color: var(--color-neutral-800);
-    border: 1px solid var(--color-neutral-700);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: var(--space-6);
     display: flex;
@@ -60,13 +60,13 @@
     margin: 0;
     font-size: var(--text-2xl);
     font-weight: 700;
-    color: var(--color-neutral-100);
+    color: var(--color-text-muted);
   }
 
   .duration {
     font-size: var(--text-sm);
-    color: var(--color-neutral-400);
-    background-color: var(--color-neutral-900);
+    color: var(--color-text-muted);
+    background-color: var(--color-primary);
     padding: var(--space-1) var(--space-3);
     border-radius: var(--radius-full);
   }
@@ -78,7 +78,7 @@
   }
 
   .stat-card {
-    background-color: var(--color-neutral-900);
+    background-color: var(--color-primary);
     border-radius: var(--radius-md);
     padding: var(--space-4);
     display: flex;
@@ -88,7 +88,7 @@
 
   .stat-label {
     font-size: var(--text-sm);
-    color: var(--color-neutral-400);
+    color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 600;
@@ -97,7 +97,7 @@
   .stat-value {
     font-size: var(--text-3xl);
     font-weight: 700;
-    color: var(--color-neutral-100);
+    color: var(--color-text-muted);
     font-family: var(--font-mono);
   }
 
@@ -123,11 +123,11 @@
   .honest-framing p {
     margin: 0;
     font-size: var(--text-sm);
-    color: var(--color-neutral-300);
+    color: var(--color-text-muted);
     line-height: var(--leading-relaxed);
   }
 
   strong {
-    color: var(--color-neutral-100);
+    color: var(--color-text-muted);
   }
 </style>

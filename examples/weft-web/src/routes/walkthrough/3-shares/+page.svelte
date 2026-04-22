@@ -40,6 +40,9 @@
 
 <PhaseShell phaseId="shares" onNext={handleNext} onPrev={handlePrev}>
 	<svelte:fragment slot="body" let:level>
+		<div class="framing-notice" data-testid="honest-framing">
+			<strong>Real FHE math, simulated committee topology.</strong> The 5 committee nodes run as Web Workers in your browser; in production these would be 5 independent organizations.
+		</div>
 		<div class="visual-container">
 			{#if level === 'novice'}
 				<div class="explainer" in:fade>
@@ -78,6 +81,16 @@
 </PhaseShell>
 
 <style>
+	.framing-notice {
+		background-color: var(--color-surface-muted);
+		color: var(--color-primary);
+		padding: 1rem;
+		border-radius: var(--radius-lg);
+		margin-bottom: 2rem;
+		font-size: 0.875rem;
+		border-left: 4px solid var(--color-primary);
+	}
+
 	.visual-container {
 		display: flex;
 		flex-direction: column;
@@ -86,11 +99,11 @@
 	}
 
 	.explainer {
-		background: var(--color-neutral-800);
+		background: var(--color-surface);
 		border-left: 4px solid var(--phase-accent);
 		padding: var(--space-4);
 		border-radius: var(--radius-md);
-		color: var(--color-neutral-200);
+		color: var(--color-text-muted);
 		font-size: var(--text-lg);
 	}
 
@@ -101,8 +114,8 @@
 	}
 
 	.node-card {
-		background: var(--color-neutral-900);
-		border: 1px solid var(--color-neutral-800);
+		background: var(--color-primary);
+		border: 1px solid var(--color-surface);
 		border-radius: var(--radius-lg);
 		padding: var(--space-4);
 		display: flex;
@@ -114,7 +127,7 @@
 
 	.node-card:hover {
 		transform: translateY(-2px);
-		border-color: var(--color-neutral-700);
+		border-color: var(--color-border);
 		box-shadow: var(--shadow-md);
 	}
 
@@ -131,7 +144,7 @@
 		width: 32px;
 		height: 32px;
 		border-radius: var(--radius-full);
-		background: var(--color-neutral-800);
+		background: var(--color-surface);
 		color: var(--phase-accent);
 		font-weight: 700;
 		font-size: var(--text-sm);
@@ -141,12 +154,12 @@
 		margin: 0;
 		font-size: var(--text-base);
 		font-weight: 600;
-		color: var(--color-neutral-100);
+		color: var(--color-text-muted);
 	}
 
 	.share-box {
-		background: var(--color-neutral-950);
-		border: 1px dashed var(--color-neutral-800);
+		background: var(--color-primary);
+		border: 1px dashed var(--color-surface);
 		border-radius: var(--radius-sm);
 		padding: var(--space-3);
 		display: flex;
@@ -156,21 +169,21 @@
 
 	.share-title {
 		font-size: var(--text-sm);
-		color: var(--color-neutral-400);
+		color: var(--color-text-muted);
 		font-weight: 500;
 	}
 
 	.share-preview {
 		font-family: var(--font-mono);
 		font-size: var(--text-xs);
-		color: var(--color-neutral-500);
+		color: var(--color-text-muted);
 		word-break: break-all;
 	}
 
 	.loading {
 		text-align: center;
 		padding: var(--space-8);
-		color: var(--color-neutral-500);
+		color: var(--color-text-muted);
 		font-style: italic;
 	}
 </style>

@@ -21,7 +21,7 @@
 <PhaseShell phaseId="meet" onNext={() => goto('/walkthrough/2-dkg')}>
   <svelte:fragment slot="body" let:level>
     <div class="framing-notice" data-testid="honest-framing">
-      <strong>What's real:</strong> the cryptography. <strong>What's simulated:</strong> the committee runs as 5 Web Workers on your machine; in production these would be 5 independent organizations.
+      <strong>Real FHE math, simulated committee topology.</strong> <strong>What's real:</strong> the cryptography. <strong>What's simulated:</strong> the committee runs as 5 Web Workers on your machine; in production these would be 5 independent organizations.
     </div>
 
     <div class="content-grid">
@@ -58,13 +58,13 @@
 
 <style>
   .framing-notice {
-    background-color: var(--color-primary-900, #1e3a8a);
-    color: var(--color-primary-100, #dbeafe);
+    background-color: var(--color-surface-muted);
+    color: var(--color-primary);
     padding: 1rem;
-    border-radius: 0.5rem;
+    border-radius: var(--radius-lg);
     margin-bottom: 2rem;
     font-size: 0.875rem;
-    border-left: 4px solid var(--color-primary-500, #3b82f6);
+    border-left: 4px solid var(--color-primary);
   }
 
   .content-grid {
@@ -73,14 +73,15 @@
   }
 
   section h2 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
-    color: var(--color-neutral-100, #f3f4f6);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--color-primary);
   }
 
   .explainer {
     font-size: 0.875rem;
-    color: var(--color-neutral-400, #9ca3af);
+    color: var(--color-text-muted);
     margin-bottom: 1rem;
   }
 
@@ -95,35 +96,36 @@
   }
 
   .card {
-    background-color: var(--color-neutral-800, #1f2937);
-    border: 1px solid var(--color-neutral-700, #374151);
-    border-radius: 0.5rem;
-    padding: 1rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    box-shadow: var(--shadow-sm);
   }
 
   .hospital-card .card-icon {
     font-size: 0.75rem;
-    color: var(--color-neutral-400, #9ca3af);
+    color: var(--color-text-muted);
     text-transform: uppercase;
   }
 
   .hospital-card h3 {
     margin: 0;
     font-size: 1rem;
-    color: var(--color-neutral-100, #f3f4f6);
+    color: var(--color-primary);
   }
 
   .hospital-card p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--color-neutral-300, #d1d5db);
+    color: var(--color-text-muted);
   }
 
   .hospital-card .specialty {
-    color: var(--color-neutral-400, #9ca3af);
+    color: var(--color-text-muted);
     font-style: italic;
   }
 
@@ -137,6 +139,6 @@
   .node-name {
     font-family: var(--font-mono, monospace);
     font-size: 0.875rem;
-    color: var(--color-neutral-200, #e5e7eb);
+    color: var(--color-text-muted);
   }
 </style>

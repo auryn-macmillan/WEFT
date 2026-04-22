@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { PLAINTEXT_MODULUS } from '$lib/crypto/mock';
 
   export let clientCount = 3;
   export let scaleFactor = 4096;
@@ -9,9 +10,7 @@
   export let isRunning = false;
 
   const dispatch = createEventDispatcher<{ runRound: void }>();
-
-  const PLAINTEXT_MODULUS = 131072;
-  $: maxClients = Math.floor((PLAINTEXT_MODULUS / 2 - 1) / scaleFactor);
+  $: maxClients = Math.floor((Number(PLAINTEXT_MODULUS) / 2 - 1) / scaleFactor);
   $: isOverflow = clientCount > maxClients;
 
   const topologies = [
@@ -120,8 +119,8 @@
 
 <style>
   .controls-panel {
-    background-color: var(--color-neutral-800, #262626);
-    border: 1px solid var(--color-neutral-700, #525252);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-lg, 16px);
     padding: var(--space-6, 24px);
     display: flex;
@@ -137,9 +136,9 @@
   }
 
   .presets button {
-    background-color: var(--color-neutral-700, #525252);
-    color: var(--color-neutral-200, #f5f5f5);
-    border: 1px solid var(--color-neutral-600, #737373);
+    background-color: var(--color-border);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-sm, 4px);
     padding: var(--space-2, 8px) var(--space-4, 16px);
     font-size: var(--text-sm, 14px);
@@ -148,7 +147,7 @@
   }
 
   .presets button:hover {
-    background-color: var(--color-neutral-600, #737373);
+    background-color: var(--color-border);
   }
 
   .control-group {
@@ -160,22 +159,22 @@
   label {
     font-size: var(--text-sm, 14px);
     font-weight: 600;
-    color: var(--color-neutral-300, #e5e5e5);
+    color: var(--color-text-muted);
   }
 
   .value-display {
-    color: var(--color-neutral-100, #fafafa);
+    color: var(--color-primary);
   }
 
   input[type="range"] {
     width: 100%;
-    accent-color: var(--color-primary, #1a9e8f);
+    accent-color: var(--color-primary);
   }
 
   select {
-    background-color: var(--color-neutral-900, #0f0f0f);
-    color: var(--color-neutral-100, #fafafa);
-    border: 1px solid var(--color-neutral-600, #737373);
+    background-color: var(--color-secondary);
+    color: var(--color-primary);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-sm, 4px);
     padding: var(--space-2, 8px);
     font-size: var(--text-base, 16px);
@@ -185,23 +184,23 @@
     font-size: var(--text-sm, 14px);
     padding: var(--space-3, 12px);
     border-radius: var(--radius-sm, 4px);
-    background-color: color-mix(in srgb, var(--color-success, #10b981) 10%, transparent);
-    color: var(--color-success, #10b981);
-    border: 1px solid color-mix(in srgb, var(--color-success, #10b981) 30%, transparent);
+    background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
+    color: var(--color-success);
+    border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
     display: flex;
     flex-direction: column;
     gap: var(--space-1, 4px);
   }
 
   .invariant-check.error {
-    background-color: color-mix(in srgb, var(--color-danger, #ef4444) 10%, transparent);
-    color: var(--color-danger, #ef4444);
-    border-color: color-mix(in srgb, var(--color-danger, #ef4444) 30%, transparent);
+    background-color: color-mix(in srgb, var(--color-danger) 10%, transparent);
+    color: var(--color-danger);
+    border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
   }
 
   .run-button {
-    background-color: var(--color-primary, #1a9e8f);
-    color: var(--color-neutral-900, #0f0f0f);
+    background-color: var(--color-primary);
+    color: var(--color-secondary);
     font-weight: 700;
     font-size: var(--text-lg, 18px);
     padding: var(--space-3, 12px);
@@ -217,8 +216,8 @@
   }
 
   .run-button:disabled {
-    background-color: var(--color-neutral-600, #737373);
-    color: var(--color-neutral-400, #d4d4d4);
+    background-color: var(--color-border);
+    color: var(--color-text-muted);
     cursor: not-allowed;
   }
 </style>

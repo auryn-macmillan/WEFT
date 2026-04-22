@@ -48,7 +48,7 @@
     clip: auto;
     white-space: normal;
     padding: 1rem;
-    background: var(--color-primary, #000);
+    background: var(--color-primary);
     color: white;
     z-index: 9999;
   }

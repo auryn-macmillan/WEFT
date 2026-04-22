@@ -21,20 +21,19 @@
   }
 </script>
 
-<div class="phase-progress" role="progressbar" aria-valuenow={phases.indexOf(current) + 1} aria-valuemin="1" aria-valuemax={phases.length}>
+<div class="phase-progress" role="group" aria-label="Phase navigation">
   {#each phases as id, index}
     {@const isCurrent = current === id}
     {@const isVisited = visited.has(id)}
     {@const isLocked = !isVisited}
     
-    <div 
+    <button
+      type="button"
       class="dot" 
       class:current={isCurrent}
       class:visited={isVisited}
       class:locked={isLocked}
       style:--dot-color="var(--color-phase-{index + 1})"
-      role="button"
-      tabindex={isVisited ? 0 : -1}
       aria-disabled={isLocked}
       aria-current={isCurrent ? 'step' : undefined}
       on:click={() => handleJump(id)}
@@ -42,7 +41,7 @@
       title={PHASES.find(p => p.id === id)?.title}
     >
       <div class="inner-dot"></div>
-    </div>
+    </button>
     
     {#if index < phases.length - 1}
       <div 
@@ -68,9 +67,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--color-neutral-800);
-    border: 2px solid var(--color-neutral-700);
+    background-color: var(--color-surface);
+    border: 2px solid var(--color-border);
     transition: all var(--duration-base) var(--ease-out);
+    padding: 0;
+    cursor: default;
   }
 
   .dot.visited {
@@ -112,12 +113,12 @@
   .connector {
     flex: 1;
     height: 2px;
-    background-color: var(--color-neutral-700);
+    background-color: var(--color-border);
     min-width: 12px;
     transition: background-color var(--duration-base) var(--ease-out);
   }
 
   .connector.active {
-    background-color: var(--color-neutral-500);
+    background-color: var(--color-text-muted);
   }
 </style>

@@ -67,7 +67,7 @@
       <div class="controls">
         {#if onPrev}
           <button class="btn btn-secondary" on:click={onPrev}>
-            Previous
+            ← Previous
           </button>
         {:else}
           <div class="spacer"></div>
@@ -81,7 +81,7 @@
 
         {#if onNext}
           <button class="btn btn-primary" on:click={onNext}>
-            Next
+            Next phase →
           </button>
         {/if}
       </div>
@@ -95,76 +95,86 @@
   .phase-shell {
     display: flex;
     width: 100%;
-    min-height: 100vh;
-    background-color: var(--color-neutral-900);
-    color: var(--color-neutral-100);
+    min-height: 100dvh;
+    background-color: var(--color-secondary); /* Mint Drenched */
+    color: var(--color-primary);
     font-family: var(--font-sans);
+    justify-content: center;
+    padding: 3rem 1.5rem;
   }
 
   .main-content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    max-width: 1200px;
+    max-width: 48rem;
     margin: 0 auto;
-    padding: var(--space-6) var(--space-4);
+    width: 100%;
+    gap: 1.5rem;
   }
 
   .header {
-    margin-bottom: var(--space-8);
-    border-bottom: 2px solid var(--phase-accent);
-    padding-bottom: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .phase-indicator {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: 0.25rem;
   }
 
   .phase-number {
     font-size: var(--text-sm);
-    color: var(--phase-accent);
+    color: var(--color-text-muted);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
   .phase-title {
-    font-size: var(--text-3xl);
-    font-weight: 700;
     margin: 0;
-    color: var(--color-neutral-100);
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--color-primary);
   }
 
   .phase-tagline {
-    font-size: var(--text-lg);
-    color: var(--color-neutral-400);
     margin: 0;
+    font-size: var(--text-xl);
+    line-height: var(--leading-snug);
+    color: var(--color-primary);
+    margin-top: 1rem;
   }
 
   .phase-description {
     font-size: var(--text-base);
-    color: var(--color-neutral-300);
-    line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-4);
+    color: var(--color-primary);
+    line-height: var(--leading-normal);
+    margin-bottom: 1.5rem;
   }
 
   .equations {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    margin-bottom: var(--space-4);
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .math-block {
     font-family: var(--font-mono);
     font-size: var(--text-sm);
-    background-color: var(--color-neutral-800);
-    padding: var(--space-3);
-    border-radius: var(--radius-sm);
-    border-left: 2px solid var(--phase-accent);
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--phase-accent);
     overflow-x: auto;
+    box-shadow: var(--shadow-sm);
   }
 
   .body-container {
@@ -174,16 +184,16 @@
   }
 
   .footer {
-    margin-top: var(--space-8);
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--color-neutral-800);
+    margin-top: 2rem;
+    padding-top: 1rem;
   }
 
   .controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: var(--space-4);
+    gap: 1rem;
+    flex-wrap: wrap;
   }
 
   .spacer {
@@ -191,40 +201,39 @@
   }
 
   .btn {
-    padding: var(--space-2) var(--space-6);
-    border-radius: var(--radius-md);
+    display: inline-block;
+    padding: 0.875rem 1.75rem;
+    border-radius: var(--radius-full);
+    text-decoration: none;
     font-weight: 600;
     font-size: var(--text-base);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-in-out);
+    transition: transform 0.15s ease, opacity 0.15s ease;
     border: none;
+    cursor: pointer;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
   }
 
   .btn-primary {
-    background-color: var(--phase-accent);
-    color: var(--color-neutral-900);
-  }
-
-  .btn-primary:hover {
-    filter: brightness(1.1);
+    background-color: var(--color-accent);
+    color: var(--color-secondary);
   }
 
   .btn-secondary {
-    background-color: var(--color-neutral-800);
-    color: var(--color-neutral-100);
-    border: 1px solid var(--color-neutral-700);
-  }
-
-  .btn-secondary:hover {
-    background-color: var(--color-neutral-700);
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+    border: 1px solid var(--color-border);
   }
 
   .btn-ghost {
     background-color: transparent;
-    color: var(--color-neutral-400);
+    color: var(--color-text-muted);
+    font-weight: 600;
   }
 
   .btn-ghost:hover {
-    color: var(--color-neutral-100);
+    color: var(--color-primary);
   }
 </style>

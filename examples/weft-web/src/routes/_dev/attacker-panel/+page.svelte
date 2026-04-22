@@ -59,7 +59,7 @@
     display: flex;
     min-height: 100vh;
     background-color: var(--color-neutral-900);
-    color: var(--color-neutral-100);
+    color: var(--color-text-muted);
     font-family: var(--font-sans);
   }
 
@@ -85,7 +85,7 @@
 
   h3 {
     font-size: var(--text-sm);
-    color: var(--color-neutral-400);
+    color: var(--color-text-muted);
     margin-bottom: var(--space-2);
     text-transform: capitalize;
   }

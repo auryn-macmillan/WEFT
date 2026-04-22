@@ -89,6 +89,9 @@
 
 <PhaseShell phaseId="threshold-decrypt" onNext={() => goto('/walkthrough/8-update')} onPrev={() => goto('/walkthrough/6-aggregate')}>
   <svelte:fragment slot="body" let:level>
+    <div class="framing-notice" data-testid="honest-framing">
+      <strong>Real FHE math, simulated committee topology.</strong> The 5 committee nodes run as Web Workers in your browser; in production these would be 5 independent organizations.
+    </div>
     <div class="header-section">
       <div class="aggregate-input">
         {#if aggregateCt}
@@ -161,12 +164,22 @@
 </PhaseShell>
 
 <style>
+  .framing-notice {
+    background-color: var(--color-surface-muted);
+    color: var(--color-primary);
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    font-size: 0.875rem;
+    border-left: 4px solid var(--color-primary);
+  }
+
   .header-section {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--color-neutral-800);
-    border: 1px solid var(--color-neutral-700);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-lg, 0.75rem);
     padding: 2rem;
     margin-bottom: 2rem;
@@ -185,7 +198,7 @@
 
   .ct-label {
     font-size: 0.75rem;
-    color: var(--color-neutral-400);
+    color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -203,7 +216,7 @@
     align-items: baseline;
     gap: 0.5rem;
     font-size: 1rem;
-    color: var(--color-neutral-300);
+    color: var(--color-text-muted);
   }
 
   .count {
@@ -237,11 +250,11 @@
 
   .btn-primary {
     background-color: var(--color-phase-7);
-    color: var(--color-neutral-900);
+    color: var(--color-primary);
   }
 
   .error {
-    color: var(--color-error, #ef4444);
+    color: var(--color-danger);
     font-size: 0.875rem;
     max-width: 200px;
     text-align: right;
@@ -255,8 +268,8 @@
   }
 
   .member-card {
-    background: var(--color-neutral-900);
-    border: 2px dashed var(--color-neutral-700);
+    background: var(--color-primary);
+    border: 2px dashed var(--color-border);
     border-radius: var(--radius-md, 0.5rem);
     padding: 1.5rem;
     display: flex;
@@ -265,12 +278,12 @@
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: left;
-    color: var(--color-neutral-100);
+    color: var(--color-text-muted);
   }
 
   .member-card:not(.disabled):hover {
-    border-color: var(--color-neutral-500);
-    background: var(--color-neutral-800);
+    border-color: var(--color-text-muted);
+    background: var(--color-surface);
   }
 
   .member-card.selected {
@@ -287,19 +300,19 @@
   .member-avatar {
     width: 3rem;
     height: 3rem;
-    background: var(--color-neutral-800);
+    background: var(--color-surface);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.25rem;
     font-weight: bold;
-    color: var(--color-neutral-400);
+    color: var(--color-text-muted);
   }
 
   .member-card.selected .member-avatar {
     background: var(--color-phase-7);
-    color: var(--color-neutral-900);
+    color: var(--color-primary);
   }
 
   .member-info {
@@ -314,7 +327,7 @@
 
   .member-status {
     font-size: 0.75rem;
-    color: var(--color-neutral-400);
+    color: var(--color-text-muted);
     display: flex;
     align-items: center;
     gap: 0.375rem;
@@ -332,11 +345,11 @@
   }
 
   .status-dot.offline {
-    background: var(--color-neutral-600);
+    background: var(--color-text-muted);
   }
 
   .result-section {
-    background: var(--color-neutral-800);
+    background: var(--color-surface);
     border: 1px solid var(--color-success);
     border-radius: var(--radius-md, 0.5rem);
     padding: 2rem;
@@ -350,11 +363,11 @@
   }
 
   .result-data {
-    background: var(--color-neutral-900);
+    background: var(--color-primary);
     padding: 1rem;
     border-radius: 0.25rem;
     font-family: var(--font-mono);
-    color: var(--color-neutral-100);
+    color: var(--color-text-muted);
     font-size: 1rem;
     overflow-x: auto;
     border-left: 4px solid var(--color-success);
@@ -363,6 +376,6 @@
   .explanation {
     margin-top: 1rem;
     font-size: 0.875rem;
-    color: var(--color-neutral-300);
+    color: var(--color-text-muted);
   }
 </style>

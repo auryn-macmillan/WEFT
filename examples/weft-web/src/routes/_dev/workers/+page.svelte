@@ -2,6 +2,7 @@
   import { onDestroy, onMount } from 'svelte';
 
   import type { BfvParams, TelemetryEventKind } from '$lib/crypto';
+  import { DEFAULT_PARAMS } from '$lib/crypto/mock';
   import {
     aggregateCiphertexts,
     combineDecryptionShares,
@@ -20,8 +21,7 @@
   import type { WorkerIdentity, WorkerTelemetryEnvelope } from '$lib/workers/messages';
 
   const demoParams: BfvParams = {
-    presetId: 'SECURE_THRESHOLD_8192',
-    plaintextModulus: 131072n,
+    ...DEFAULT_PARAMS,
     polyDegree: 8192,
     threshold: 3,
     committeeSize: COMMITTEE_WORKER_COUNT

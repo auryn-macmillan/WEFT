@@ -45,6 +45,9 @@
 
 <PhaseShell phaseId="dkg" onNext={dkgTranscript ? () => goto('/walkthrough/3-shares') : undefined} onPrev={() => goto('/walkthrough/1-meet')}>
   <svelte:fragment slot="body" let:level>
+    <div class="framing-notice" data-testid="honest-framing">
+      <strong>Real FHE math, simulated committee topology.</strong> The 5 committee nodes run as Web Workers in your browser; in production these would be 5 independent organizations.
+    </div>
     <div class="content-grid">
       <section class="action-section">
         {#if !isGenerating && !dkgTranscript}
@@ -105,6 +108,16 @@
 </PhaseShell>
 
 <style>
+  .framing-notice {
+    background-color: var(--color-surface-muted);
+    color: var(--color-primary);
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    font-size: 0.875rem;
+    border-left: 4px solid var(--color-primary);
+  }
+
   .content-grid {
     display: flex;
     flex-direction: column;
@@ -117,16 +130,16 @@
     align-items: center;
     justify-content: center;
     min-height: 150px;
-    background-color: var(--color-neutral-800, #1f2937);
-    border-radius: 0.5rem;
+    background-color: var(--color-surface);
+    border-radius: var(--radius-lg);
     padding: 2rem;
-    border: 1px solid var(--color-neutral-700, #374151);
+    border: 1px solid var(--color-border);
     text-align: center;
   }
 
   .instructions p {
     margin-bottom: 1.5rem;
-    color: var(--color-neutral-300, #d1d5db);
+    color: var(--color-text-muted);
   }
 
   .btn {
@@ -140,19 +153,19 @@
   }
 
   .btn-primary {
-    background-color: var(--color-primary-500, #3b82f6);
+    background-color: var(--color-info);
     color: white;
   }
 
   .btn-primary:hover {
-    background-color: var(--color-primary-400, #60a5fa);
+    background-color: var(--color-info);
   }
 
   .spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid var(--color-neutral-700, #374151);
-    border-top-color: var(--color-primary-500, #3b82f6);
+    border: 4px solid var(--color-border);
+    border-top-color: var(--color-primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin: 0 auto 1rem;
@@ -163,35 +176,36 @@
   }
 
   .success-state h3 {
-    color: var(--color-success-400, #4ade80);
+    color: var(--color-success);
     margin-bottom: 1rem;
     font-size: 1.25rem;
   }
 
   .key-preview {
     font-family: var(--font-mono, monospace);
-    background-color: var(--color-neutral-900, #111827);
+    background-color: var(--color-secondary);
     padding: 1rem;
     border-radius: 0.375rem;
-    border: 1px solid var(--color-neutral-700, #374151);
-    color: var(--color-primary-300, #93c5fd);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
     margin-bottom: 1rem;
     word-break: break-all;
   }
 
   .subtitle {
     font-size: 0.875rem;
-    color: var(--color-neutral-400, #9ca3af);
+    color: var(--color-text-muted);
   }
 
   .error-state {
-    color: var(--color-error-400, #f87171);
+    color: var(--color-danger);
   }
 
   section h2 {
-    font-size: 1.25rem;
-    margin-bottom: 1.5rem;
-    color: var(--color-neutral-100, #f3f4f6);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--color-primary);
   }
 
   .cards-container {
@@ -201,33 +215,30 @@
   }
 
   .card {
-    background-color: var(--color-neutral-800, #1f2937);
-    border: 1px solid var(--color-neutral-700, #374151);
-    border-radius: 0.5rem;
-    padding: 1.5rem 1rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-sm);
   }
 
   .node-name {
     font-family: var(--font-mono, monospace);
     font-size: 0.875rem;
-    color: var(--color-neutral-200, #e5e7eb);
+    color: var(--color-text-muted);
     font-weight: 600;
   }
 
   .shard-status {
     font-size: 0.75rem;
-    color: var(--color-neutral-400, #9ca3af);
+    color: var(--color-text-muted);
   }
 
   .shard-bytes {
-    color: var(--color-primary-300, #93c5fd);
+    color: var(--color-text-muted);
     background-color: rgba(59, 130, 246, 0.1);
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
@@ -235,12 +246,12 @@
   }
 
   .glowing {
-    border-color: var(--color-primary-500, #3b82f6);
+    border-color: var(--color-primary);
     animation: shard-glow 2s infinite alternate;
   }
 
   .has-shard {
-    border-color: var(--color-success-500, #22c55e);
+    border-color: var(--color-success);
   }
 
   @keyframes shard-glow {

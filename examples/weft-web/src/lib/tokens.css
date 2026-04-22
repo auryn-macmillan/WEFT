@@ -32,8 +32,13 @@
    ========================================================================== */
 :root {
   /* Colors: Core */
-  --color-primary: #127368;
-  --color-secondary: #d64d36;
+  --color-primary: #0a0a0a;
+  --color-secondary: #d9fce8; /* Mint background */
+  --color-accent: #0a0a0a; /* Near-black CTAs */
+  --color-surface: #fffaf0; /* Warm cream surface */
+  --color-surface-muted: #f1f5f9;
+  --color-border: #14532d; /* Dark green borders */
+  --color-text-muted: #166534; /* Muted dark green for text */
   
   /* Colors: Neutral Scale (9 steps from #fafafa to #0f0f0f) */
   --color-neutral-100: #fafafa;
@@ -47,24 +52,24 @@
   --color-neutral-900: #0f0f0f;
   
   /* Colors: Semantic */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #3b82f6;
+  --color-success: #15803d;
+  --color-warning: #c2410c;
+  --color-danger: #b91c1c;
+  --color-info: #0f766e;
   
-  /* Colors: 8 Phase Accent Hues (Distinct & Accessible) */
-  --color-phase-1: #d946ef; /* Fuchsia (meet-participants) */
-  --color-phase-2: #8b5cf6; /* Violet (distributed-keygen) */
-  --color-phase-3: #6366f1; /* Indigo (share-distribution) */
-  --color-phase-4: #0ea5e9; /* Sky (aggregate-pk) */
-  --color-phase-5: #14b8a6; /* Teal (train-encrypt) */
-  --color-phase-6: #84cc16; /* Lime (homomorphic-add) */
-  --color-phase-7: #eab308; /* Yellow (threshold-decrypt) */
-  --color-phase-8: #f97316; /* Orange (global-update) */
+  /* Colors: 8 Phase Accent Hues (Distinct & Accessible, Interfold-compatible) */
+  --color-phase-1: #166534; /* Green-800 */
+  --color-phase-2: #15803d; /* Green-700 */
+  --color-phase-3: #14532d; /* Green-900 */
+  --color-phase-4: #115e59; /* Teal-800 */
+  --color-phase-5: #0f766e; /* Teal-700 */
+  --color-phase-6: #9a3412; /* Terracotta / orange-800 */
+  --color-phase-7: #c2410c; /* Warm clay / orange-700 */
+  --color-phase-8: #7c2d12; /* Orange-600 */
 
   /* Typography: Families */
   --font-sans: 'Inter', system-ui, sans-serif;
-  --font-display: 'Inter', system-ui, sans-serif; /* Can be updated later */
+  --font-display: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   
   /* Typography: Size Scale */
@@ -128,8 +133,8 @@
 /* High-Contrast Overrides */
 @media (prefers-contrast: more) {
   :root {
-    --color-primary: #0a5f54; /* Darker teal for higher contrast */
-    --color-secondary: #ad311a; /* Darker coral */
+    --color-primary: #000000;
+    --color-secondary: #ffffff;
     
     --color-neutral-400: #737373;
     --color-neutral-500: #404040;

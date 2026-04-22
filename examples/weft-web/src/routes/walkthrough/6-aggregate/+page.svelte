@@ -55,6 +55,10 @@
 
 <PhaseShell phaseId="homomorphic-add" onNext={() => goto('/walkthrough/7-decrypt')} onPrev={() => goto('/walkthrough/5-train-encrypt')}>
   <svelte:fragment slot="body" let:level>
+    <div class="framing-notice" data-testid="honest-framing">
+      <strong>Real FHE math, simulated committee topology.</strong> The 5 committee nodes run as Web Workers in your browser; in production these would be 5 independent organizations.
+    </div>
+
     <div class="insight-callout">
       <strong>Key Insight:</strong> We added encrypted numbers without ever seeing them.
     </div>
@@ -101,14 +105,24 @@
 </PhaseShell>
 
 <style>
-  .insight-callout {
-    background-color: var(--color-primary-900, #1e3a8a);
-    color: var(--color-primary-100, #dbeafe);
+  .framing-notice {
+    background-color: var(--color-surface-muted);
+    color: var(--color-primary);
     padding: 1rem;
-    border-radius: 0.5rem;
+    border-radius: var(--radius-lg);
     margin-bottom: 2rem;
     font-size: 0.875rem;
-    border-left: 4px solid var(--color-primary-500, #3b82f6);
+    border-left: 4px solid var(--color-primary);
+  }
+
+  .insight-callout {
+    background-color: var(--color-surface-muted);
+    color: var(--color-primary);
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    font-size: 0.875rem;
+    border-left: 4px solid var(--color-primary);
   }
 
   .actions {
@@ -142,8 +156,8 @@
     align-items: center;
     gap: 2rem;
     padding: 2rem;
-    background: var(--color-neutral-900);
-    border: 1px dashed var(--color-neutral-700);
+    background: var(--color-primary);
+    border: 1px dashed var(--color-border);
     border-radius: 0.75rem;
   }
 
@@ -176,7 +190,7 @@
 
   .plus-icon {
     font-size: 2rem;
-    color: var(--color-neutral-500);
+    color: var(--color-text-muted);
     font-weight: bold;
   }
 
@@ -184,8 +198,8 @@
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    background: var(--color-neutral-800);
-    border: 2px solid var(--color-neutral-600);
+    background: var(--color-surface);
+    border: 2px solid var(--color-text-muted);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -200,21 +214,21 @@
   }
 
   .idle-text {
-    color: var(--color-neutral-500);
+    color: var(--color-text-muted);
     font-size: 0.875rem;
   }
 
   .loader {
     width: 2rem;
     height: 2rem;
-    border: 3px solid var(--color-neutral-600);
+    border: 3px solid var(--color-text-muted);
     border-top-color: var(--color-primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
 
   .success-check {
-    color: var(--color-success, #10b981);
+    color: var(--color-success);
     font-size: 2.5rem;
   }
 
@@ -229,12 +243,12 @@
   .placeholder-tile {
     width: 100%;
     height: 80px;
-    border: 2px dashed var(--color-neutral-700);
-    border-radius: 0.5rem;
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-neutral-500);
+    color: var(--color-text-muted);
     font-style: italic;
   }
 

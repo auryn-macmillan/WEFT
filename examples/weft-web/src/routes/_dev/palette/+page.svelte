@@ -130,14 +130,14 @@
     padding: var(--space-8, 32px);
     max-width: 1200px;
     margin: 0 auto;
-    color: var(--color-neutral-900, #0f0f0f);
-    background: var(--color-neutral-100, #fafafa);
+    color: var(--color-secondary);
+    background: var(--color-primary);
   }
   
   .header {
     margin-bottom: var(--space-10, 40px);
     padding-bottom: var(--space-4, 16px);
-    border-bottom: 1px solid var(--color-neutral-300, #e5e5e5);
+    border-bottom: 1px solid var(--color-text-muted);
   }
   
   .header h1 {
@@ -158,7 +158,7 @@
   .section h2 {
     font-size: var(--text-2xl, 24px);
     margin-bottom: var(--space-6, 24px);
-    color: var(--color-primary, #1a9e8f);
+    color: var(--color-primary);
   }
   
   h3 {
@@ -184,13 +184,13 @@
     height: 80px;
     border-radius: var(--radius-md, 8px);
     box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-neutral-300, #e5e5e5);
+    border: 1px solid var(--color-text-muted);
   }
 
   code {
     font-family: var(--font-mono, monospace);
     font-size: var(--text-xs, 12px);
-    background: var(--color-neutral-200, #f5f5f5);
+    background: var(--color-text-muted);
     padding: var(--space-1, 4px) var(--space-2, 8px);
     border-radius: var(--radius-sm, 4px);
     text-align: center;
@@ -236,6 +236,6 @@
     text-align: center;
     background: white;
     font-size: var(--text-sm, 14px);
-    color: var(--color-neutral-600, #737373);
+    color: var(--color-border);
   }
 </style>

@@ -124,7 +124,7 @@
 
 	.pill-toggle {
 		display: inline-flex;
-		background: var(--color-neutral-200);
+		background: var(--color-surface);
 		border-radius: var(--radius-full);
 		padding: var(--space-1);
 		align-self: flex-start;
@@ -144,18 +144,18 @@
 		font-family: var(--font-sans);
 		font-size: var(--text-sm);
 		font-weight: 500;
-		color: var(--color-neutral-600);
+		color: var(--color-text-muted);
 		cursor: pointer;
 		transition: all 0.2s ease;
 		z-index: 1;
 	}
 
 	.pill-segment:hover {
-		color: var(--color-neutral-900);
+		color: var(--color-primary);
 	}
 
 	.pill-segment.active {
-		color: #ffffff;
+		color: var(--color-secondary);
 		background: var(--color-primary);
 	}
 

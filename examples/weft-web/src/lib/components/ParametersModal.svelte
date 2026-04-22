@@ -175,7 +175,7 @@
   }
 
   .modal {
-    background-color: var(--color-neutral-100);
+    background-color: var(--color-text-muted);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     width: 90%;
@@ -183,7 +183,7 @@
     max-height: 90vh;
     overflow-y: auto;
     font-family: var(--font-sans);
-    color: var(--color-neutral-900);
+    color: var(--color-primary);
   }
 
   .header {
@@ -191,7 +191,7 @@
     justify-content: space-between;
     align-items: center;
     padding: var(--space-4) var(--space-6);
-    border-bottom: 1px solid var(--color-neutral-300);
+    border-bottom: 1px solid var(--color-text-muted);
   }
 
   .header h2 {
@@ -204,11 +204,11 @@
     border: none;
     font-size: var(--text-2xl);
     cursor: pointer;
-    color: var(--color-neutral-600);
+    color: var(--color-text-muted);
   }
 
   .close-btn:hover {
-    color: var(--color-neutral-900);
+    color: var(--color-primary);
   }
 
   .content {
@@ -225,7 +225,7 @@
   }
 
   .param-card {
-    background-color: var(--color-neutral-200);
+    background-color: var(--color-text-muted);
     padding: var(--space-3);
     border-radius: var(--radius-md);
     display: flex;
@@ -235,7 +235,7 @@
 
   .param-card strong {
     font-size: var(--text-sm);
-    color: var(--color-neutral-700);
+    color: var(--color-border);
   }
 
   .param-card span {
@@ -244,8 +244,8 @@
   }
 
   .invariant-section {
-    background-color: var(--color-neutral-100);
-    border: 1px solid var(--color-neutral-300);
+    background-color: var(--color-text-muted);
+    border: 1px solid var(--color-text-muted);
     border-radius: var(--radius-md);
     padding: var(--space-4);
   }
@@ -257,7 +257,7 @@
 
   .description {
     font-size: var(--text-sm);
-    color: var(--color-neutral-600);
+    color: var(--color-text-muted);
     margin-bottom: var(--space-4);
   }
 
@@ -273,8 +273,8 @@
   }
 
   .equation {
-    background-color: var(--color-neutral-900);
-    color: var(--color-neutral-100);
+    background-color: var(--color-primary);
+    color: var(--color-text-muted);
     padding: var(--space-4);
     border-radius: var(--radius-sm);
     font-family: var(--font-mono);
@@ -299,7 +299,7 @@
   }
 
   .math-line.numbers {
-    color: var(--color-neutral-400);
+    color: var(--color-text-muted);
     font-size: var(--text-sm);
   }
 
@@ -318,7 +318,7 @@
   }
 
   .disclosure-tier {
-    border-top: 1px solid var(--color-neutral-300);
+    border-top: 1px solid var(--color-text-muted);
     padding-top: var(--space-4);
   }
 
@@ -335,7 +335,7 @@
 
   .math-details {
     margin-top: var(--space-4);
-    background-color: var(--color-neutral-200);
+    background-color: var(--color-text-muted);
     padding: var(--space-4);
     border-radius: var(--radius-md);
   }
@@ -347,8 +347,8 @@
 
   .math-details code {
     display: block;
-    background-color: var(--color-neutral-900);
-    color: var(--color-neutral-100);
+    background-color: var(--color-primary);
+    color: var(--color-text-muted);
     padding: var(--space-3);
     border-radius: var(--radius-sm);
     margin-bottom: var(--space-4);

@@ -6,12 +6,11 @@
   import { HOSPITALS } from '$lib/content/hospitals';
   import PhaseShell from '$lib/components/PhaseShell.svelte';
   import CiphertextTile from '$lib/components/CiphertextTile.svelte';
-  import { MockCryptoEngine } from '$lib/crypto/mock';
+  import { MockCryptoEngine, PLAINTEXT_MODULUS } from '$lib/crypto/mock';
   import type { CiphertextBytes, PublicKeyBytes } from '$lib/crypto/engine';
   import { fade, slide } from 'svelte/transition';
 
   const SCALE_FACTOR = 4096;
-  const PLAINTEXT_MOD = 131072; // t
 
   const engine = new MockCryptoEngine();
 
@@ -44,7 +43,7 @@
       gradientsFloat: fakeGradients[i],
       gradientsInt: fakeGradients[i].map(g => {
         let x = Math.round(g * SCALE_FACTOR);
-        if (x < 0) x = PLAINTEXT_MOD + x;
+        if (x < 0) x = Number(PLAINTEXT_MODULUS) + x;
         return x;
       }),
       ciphertext: null,
@@ -108,7 +107,7 @@
 <PhaseShell phaseId="train-encrypt" onNext={() => goto('/walkthrough/6-aggregate')} onPrev={() => goto('/walkthrough/4-aggregate-pk')}>
   <svelte:fragment slot="body" let:level>
     <div class="framing-notice" data-testid="honest-framing">
-      <strong>Notice:</strong> The gradients here are scripted; the encryption is real.
+      <strong>Real FHE math, simulated committee topology.</strong> The 5 committee nodes run as Web Workers in your browser; in production these would be 5 independent organizations.
     </div>
 
     <div class="pk-banner">
@@ -151,7 +150,7 @@
                       <span class="float">{g.toFixed(2)}</span> &times; <span class="scale">S({SCALE_FACTOR})</span> =
                       {#if g < 0}
                         {#if level === 'show-math'}
-                          <span class="equation">t({PLAINTEXT_MOD}) - {Math.abs(Math.round(g * SCALE_FACTOR))} &rarr;</span>
+                          <span class="equation">t({Number(PLAINTEXT_MODULUS)}) - {Math.abs(Math.round(g * SCALE_FACTOR))} &rarr;</span>
                         {/if}
                       {/if}
                       <span class="int">{lane.gradientsInt[j]}</span>
@@ -186,21 +185,21 @@
 
 <style>
   .framing-notice {
-    background-color: var(--color-primary-900, #1e3a8a);
-    color: var(--color-primary-100, #dbeafe);
+    background-color: var(--color-surface-muted);
+    color: var(--color-primary);
     padding: 1rem;
-    border-radius: 0.5rem;
+    border-radius: var(--radius-lg);
     margin-bottom: 2rem;
     font-size: 0.875rem;
-    border-left: 4px solid var(--color-primary-500, #3b82f6);
+    border-left: 4px solid var(--color-primary);
   }
 
   .pk-banner {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--color-neutral-800);
-    border: 1px solid var(--color-neutral-700);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-md, 0.5rem);
     padding: 1rem 1.5rem;
     margin-bottom: 2rem;
@@ -208,13 +207,13 @@
 
   .pk-label {
     font-weight: 600;
-    color: var(--color-neutral-300);
+    color: var(--color-text-muted);
   }
 
   .pk-value {
     font-family: var(--font-mono);
     color: var(--color-phase-4);
-    background: var(--color-neutral-900);
+    background: var(--color-primary);
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
     font-size: 0.875rem;
@@ -252,8 +251,8 @@
   }
 
   .swimlane {
-    background: var(--color-neutral-800);
-    border: 1px solid var(--color-neutral-700);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-lg, 0.75rem);
     overflow: hidden;
     display: flex;
@@ -261,38 +260,38 @@
   }
 
   .lane-header {
-    background: var(--color-neutral-900);
+    background: var(--color-primary);
     padding: 0.75rem 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--color-neutral-700);
+    border-bottom: 1px solid var(--color-border);
   }
 
   .lane-header h3 {
     margin: 0;
     font-size: 1rem;
-    color: var(--color-neutral-100);
+    color: var(--color-text-muted);
   }
 
   .status-badge {
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
     border-radius: 9999px;
-    background: var(--color-neutral-700);
-    color: var(--color-neutral-300);
+    background: var(--color-border);
+    color: var(--color-text-muted);
     font-weight: 600;
     letter-spacing: 0.05em;
   }
 
   .status-badge.active {
     background: var(--color-info);
-    color: #fff;
+    color: var(--color-secondary);
   }
 
   .status-badge.done {
     background: var(--color-success);
-    color: #fff;
+    color: var(--color-secondary);
   }
 
   .lane-content {
@@ -303,7 +302,7 @@
   }
 
   .idle-state {
-    color: var(--color-neutral-500);
+    color: var(--color-text-muted);
     font-style: italic;
   }
 
@@ -317,7 +316,7 @@
   .loader {
     width: 1.5rem;
     height: 1.5rem;
-    border: 2px solid var(--color-neutral-600);
+    border: 2px solid var(--color-text-muted);
     border-top-color: var(--color-primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -335,7 +334,7 @@
 
   .data-preview .label {
     font-size: 0.75rem;
-    color: var(--color-neutral-400);
+    color: var(--color-text-muted);
   }
 
   .data-preview code {
@@ -359,7 +358,7 @@
   }
 
   .float { color: var(--color-primary); }
-  .scale { color: var(--color-neutral-400); }
+  .scale { color: var(--color-text-muted); }
   .equation { color: var(--color-warning); font-size: 0.875rem; font-family: var(--font-mono); }
   .int { color: var(--color-success); font-weight: bold; }
   
@@ -368,7 +367,7 @@
     color: var(--color-warning);
     margin-top: 0.5rem;
     padding-top: 0.5rem;
-    border-top: 1px dashed var(--color-neutral-700);
+    border-top: 1px dashed var(--color-border);
   }
 
   /* Specific fix for CiphertextTile step */

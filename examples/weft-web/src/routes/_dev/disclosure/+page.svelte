@@ -62,7 +62,7 @@
 		padding: var(--space-6);
 		border-radius: var(--radius-md);
 		border: 1px solid var(--color-neutral-300);
-		background: var(--color-neutral-100);
+		background: var(--color-surface);
 	}
 
 	h1 {

@@ -47,6 +47,9 @@
 
 <PhaseShell phaseId="aggregate-pk" onNext={handleNext} onPrev={handlePrev}>
 	<svelte:fragment slot="body" let:level>
+		<div class="framing-notice" data-testid="honest-framing">
+			<strong>Real FHE math, simulated committee topology.</strong> The 5 committee nodes run as Web Workers in your browser; in production these would be 5 independent organizations.
+		</div>
 		<div class="visual-container">
 			{#if level === 'novice'}
 				<div class="explainer" in:fade>
@@ -105,6 +108,16 @@
 </PhaseShell>
 
 <style>
+	.framing-notice {
+		background-color: var(--color-surface-muted);
+		color: var(--color-primary);
+		padding: 1rem;
+		border-radius: var(--radius-lg);
+		margin-bottom: 2rem;
+		font-size: 0.875rem;
+		border-left: 4px solid var(--color-primary);
+	}
+
 	.visual-container {
 		display: flex;
 		flex-direction: column;
@@ -113,11 +126,11 @@
 	}
 
 	.explainer {
-		background: var(--color-neutral-800);
+		background: var(--color-surface);
 		border-left: 4px solid var(--phase-accent);
 		padding: var(--space-4);
 		border-radius: var(--radius-md);
-		color: var(--color-neutral-200);
+		color: var(--color-text-muted);
 		font-size: var(--text-lg);
 	}
 
@@ -140,9 +153,9 @@
 	}
 
 	.fragment-tile {
-		background: var(--color-neutral-800);
+		background: var(--color-surface);
 		border: 1px solid var(--phase-accent);
-		color: var(--color-neutral-100);
+		color: var(--color-text-muted);
 		padding: var(--space-2) var(--space-4);
 		border-radius: var(--radius-md);
 		font-size: var(--text-sm);
@@ -168,7 +181,7 @@
 	}
 
 	.combined-key {
-		background: linear-gradient(135deg, var(--color-neutral-900), var(--color-neutral-950));
+		background: linear-gradient(135deg, var(--color-primary), var(--color-primary));
 		border: 2px solid var(--phase-accent);
 		border-radius: var(--radius-lg);
 		padding: var(--space-6);
@@ -201,15 +214,15 @@
 	.key-header h2 {
 		margin: 0;
 		font-size: var(--text-xl);
-		color: var(--color-neutral-100);
+		color: var(--color-text-muted);
 		font-weight: 700;
 	}
 
 	.key-body {
-		background: var(--color-neutral-950);
+		background: var(--color-primary);
 		border-radius: var(--radius-sm);
 		padding: var(--space-4);
-		border: 1px solid var(--color-neutral-800);
+		border: 1px solid var(--color-surface);
 	}
 
 	.hex-preview {
@@ -226,12 +239,12 @@
 		justify-content: space-between;
 		align-items: center;
 		font-size: var(--text-sm);
-		color: var(--color-neutral-400);
+		color: var(--color-text-muted);
 	}
 
 	.badge {
 		background: var(--color-success);
-		color: var(--color-neutral-900);
+		color: var(--color-primary);
 		padding: var(--space-1) var(--space-3);
 		border-radius: var(--radius-full);
 		font-weight: 700;
@@ -243,7 +256,7 @@
 	.loading {
 		text-align: center;
 		padding: var(--space-8);
-		color: var(--color-neutral-500);
+		color: var(--color-text-muted);
 		font-style: italic;
 	}
 </style>
