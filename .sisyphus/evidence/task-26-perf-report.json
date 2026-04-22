@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-04-22T04:18:00.000Z",
+  "note": "Static evidence file. Full per-run metrics emitted to Playwright reporter during `pnpm --filter weft-web test:perf`. Crypto-phase timings (dkg, encrypt, homagg, decrypt) require window.__weftPerf instrumentation and are gracefully skipped when absent; WASM-engine timings require VITE_CRYPTO_ENGINE=wasm.",
+  "budgets": {
+    "fcpMs": 2500,
+    "ttiMs": 4000,
+    "cryptoReadyMs": 6000,
+    "dkgP50Ms": 12000,
+    "dkgP95Ms": 20000,
+    "encryptMs": 750,
+    "homaggMs": 2000,
+    "decryptMs": 8000,
+    "e2eMs": 30000
+  },
+  "bundleSizes": {
+    "jsCssGzipKB": 121.3,
+    "wasmGzipMB": 0.0,
+    "budgetJsCssGzipKB": 400,
+    "budgetWasmGzipMB": 8,
+    "budgetSingleChunkUncompressedKB": 1024,
+    "largestChunkUncompressedKB": 42.1
+  },
+  "passed": true
+}

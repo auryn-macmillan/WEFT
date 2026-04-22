@@ -47,3 +47,22 @@
 - When implementing reactive parameter controls in Svelte (like threshold picking dependent on committee size), avoid cyclical dependencies in `$:` blocks by updating dependencies sequentially in click handlers and only providing a one-way reactive conversion.
 - BFV invariant validation `numClients * scaleFactor * maxGradAbs < t / 2` should disable "Run round" to prevent silent overflow corruption. Max clients for S=4096 is 15.
 - The `MockCryptoEngine` can be run cleanly synchronously inside `+page.svelte` script tags.
+
+## [2026-04-22] T24: WasmCryptoEngine wiring
+- The threshold WASM API uses the underlying TRBFV convention (`threshold = shares_required - 1`), so the app-facing `CryptoEngine` threshold has to be translated before `dkg_round1` / `dkg_round2` and then recovered from share metadata before `combine_decryption_shares`.
+- A dedicated crypto worker keeps BFV operations off the main thread while still letting the high-level engine stay tiny; exporting the worker-side service class separately makes the wasm orchestration unit-testable without spinning up a real Worker.
+- `load_params()` should be cached per worker instance: DKG helpers construct params internally, but BFV encrypt/add paths reuse the params handle and should lazy-init only on first crypto call.
+
+## Documentation Standards for WEFT Web
+- Honest framing must be prominent and include the 5 mandatory disclosures regarding simulation, lack of on-chain component, lack of RISC Zero proof, parameter presets, and seeded randomness.
+- Architecture should highlight the worker topology (3 hospitals, 5 committee, 1 aggregator) and the CryptoEngine abstraction.
+- README should provide a clear path to rebuilding WASM and switching between mock/wasm engines.
+
+## [2026-04-22] T26: Perf profiling + bundle-size enforcement
+- `rollup-plugin-visualizer` integrates cleanly into vite.config.ts as a Vite plugin; set `filename` via env var `BUNDLE_STATS_OUT` to write output to `.sisyphus/evidence/`.
+- Bundle size for the mock-engine build is tiny: JS+CSS gzip total ~121 KB (budget 400 KB). No WASM assets are present without the `@weft/fhe-wasm` package built.
+- `tsx` can run `.ts` scripts directly without compilation; use `tsx scripts/check-bundle-size.ts` in npm scripts.
+- `window.__weftPerf` is not yet populated by the app; perf spec gracefully skips per-phase budget assertions when absent and emits a clear warning.
+- Playwright perf config uses `workers: 1` and `fullyParallel: false` to avoid contention between iterations on the same dev server.
+- Per-run FCP/TTI measured via `performance.getEntriesByType('navigation')[0]` and `performance.getEntriesByName('first-contentful-paint')`.
+- WASM engine timings (DKG p50/p95, encrypt, homagg, decrypt) require `VITE_CRYPTO_ENGINE=wasm`; spec warns and skips gracefully when not set.
