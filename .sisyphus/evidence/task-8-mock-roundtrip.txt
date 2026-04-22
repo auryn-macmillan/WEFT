@@ -1,0 +1,8 @@
+pnpm --filter weft-web test:unit src/lib/crypto/__tests__/mock.test.ts
+
+Result: PASS
+
+- 3 tests passed
+- Round-trip verified for 3 clients
+- Negative values round-tripped through mock combine
+- Below-threshold combine rejected as expected

@@ -1,0 +1,10 @@
+MockCryptoEngine telemetry coverage
+
+Observed event kinds:
+- dkg-start / dkg-done
+- encrypt-start / encrypt-done
+- aggregate-start / aggregate-done
+- partial-decrypt-start / partial-decrypt-done
+- combine-start / combine-done
+
+Unit test coverage: telemetry emitted for every operation in round-trip flow.
