@@ -1,0 +1,97 @@
+name: Deploy WEFT Web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'examples/weft-web/**'
+      - '.github/workflows/deploy-weft-web.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Setup wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Restore Cargo cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            examples/weft-web/crates/fhe-wasm/target
+          key: ${{ runner.os }}-cargo-weft-web-${{ hashFiles('examples/weft-web/crates/fhe-wasm/Cargo.lock', 'Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-weft-web-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build WASM
+        run: wasm-pack build --target bundler --release examples/weft-web/crates/fhe-wasm --out-dir ../../packages/fhe-wasm/pkg
+
+      - name: Build app
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}
+        run: pnpm --filter weft-web build
+
+      - name: Run bundle check
+        run: |
+          if node -e "const p = require('./examples/weft-web/package.json'); process.exit(p.scripts && p.scripts['check:bundle'] ? 0 : 1)"; then
+            pnpm --filter weft-web check:bundle
+          fi
+
+      - name: Ensure .nojekyll and SPA 404 fallback
+        run: |
+          touch examples/weft-web/build/.nojekyll
+          cp examples/weft-web/build/index.html examples/weft-web/build/404.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: examples/weft-web/build
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
