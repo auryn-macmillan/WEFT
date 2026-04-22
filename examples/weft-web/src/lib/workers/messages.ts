@@ -59,6 +59,7 @@ export interface PingResponse {
 export interface DkgRequest {
   readonly type: 'dkg-request';
   readonly requestId: string;
+  readonly roundId: string;
   readonly committeeSize: number;
   readonly threshold: number;
 }
@@ -70,12 +71,12 @@ export interface DkgContribution {
   readonly partyIndex: number;
   readonly publicKeyBuffer: ArrayBuffer;
   readonly contributionBuffer: ArrayBuffer;
-  readonly secretShareBuffer: ArrayBuffer;
 }
 
 export interface PartialDecryptRequest {
   readonly type: 'partial-decrypt-request';
   readonly requestId: string;
+  readonly roundId: string;
   readonly ciphertextBuffer: ArrayBuffer;
 }
 
@@ -119,6 +120,7 @@ export interface AggregateResponse {
 export interface CombineRequest {
   readonly type: 'combine-request';
   readonly requestId: string;
+  readonly roundId: string;
   readonly ciphertextBuffer: ArrayBuffer;
   readonly shareBuffers: readonly ArrayBuffer[];
   readonly partyIndices: readonly number[];
@@ -167,7 +169,6 @@ export function getMessageTransferables(message: WorkerMessage): Transferable[] 
     case 'dkg-contribution':
       pushBuffer(transferables, message.publicKeyBuffer);
       pushBuffer(transferables, message.contributionBuffer);
-      pushBuffer(transferables, message.secretShareBuffer);
       return transferables;
     case 'partial-decrypt-request':
       pushBuffer(transferables, message.ciphertextBuffer);

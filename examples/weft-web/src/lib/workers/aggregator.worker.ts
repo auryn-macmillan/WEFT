@@ -28,7 +28,7 @@ const aggregatorApi: AggregatorWorkerApi = {
   async ping(request: PingRequest): Promise<PingResponse> {
     ensureRuntimeConfigured(runtimeState);
 
-    const now = performance.now();
+    const now = Date.now();
     return {
       type: 'ping-response',
       requestId: request.requestId,
@@ -48,12 +48,12 @@ const aggregatorApi: AggregatorWorkerApi = {
     const aggregateCiphertext = await runtimeState.engine.aggregateCiphertexts(ciphertexts);
     const ciphertextBuffer = bytesToBuffer(aggregateCiphertext.bytes);
 
-    return {
+    return Comlink.transfer({
       type: 'aggregate-response',
       requestId: request.requestId,
       workerId: runtimeState.identity.workerId,
-      ciphertextBuffer: Comlink.transfer(ciphertextBuffer, [ciphertextBuffer])
-    };
+      ciphertextBuffer
+    }, [ciphertextBuffer]);
   }
 };
 

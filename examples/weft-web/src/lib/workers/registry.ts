@@ -18,8 +18,10 @@ import type {
   WorkerBootstrap,
   WorkerEngineDescriptor,
   WorkerIdentity,
+  WorkerMessage,
   WorkerTelemetrySink
 } from './messages';
+import { getMessageTransferables } from './messages';
 
 export const COMMITTEE_WORKER_COUNT = 5;
 export const HOSPITAL_WORKER_COUNT = 3;
@@ -40,14 +42,36 @@ export interface WorkerRegistry {
 }
 
 export let workerRegistry: WorkerRegistry | null = null;
+let workerRegistryPromise: Promise<WorkerRegistry> | null = null;
+
+function createCommitteeWorker(): Worker {
+  return new Worker(new URL('./committee.worker.ts', import.meta.url), { type: 'module' });
+}
+
+function createHospitalWorker(): Worker {
+  return new Worker(new URL('./hospital.worker.ts', import.meta.url), { type: 'module' });
+}
+
+function createAggregatorWorker(): Worker {
+  return new Worker(new URL('./aggregator.worker.ts', import.meta.url), { type: 'module' });
+}
+
+function transferMessage<T extends WorkerMessage>(message: T): T {
+  const transferables = getMessageTransferables(message);
+  if (transferables.length === 0) {
+    return message;
+  }
+
+  return Comlink.transfer(message, transferables);
+}
 
 async function createWorkerEntry<Api extends object>(
   identity: WorkerIdentity,
-  url: URL,
+  createWorker: () => Worker,
   engineFactory: EngineFactory,
   telemetrySink?: WorkerTelemetrySink
 ): Promise<WorkerEntry<Api>> {
-  const worker = new Worker(url, { type: 'module' });
+  const worker = createWorker();
   const api = Comlink.wrap<Api>(worker);
   const bootstrap: WorkerBootstrap = {
     identity,
@@ -74,60 +98,89 @@ export async function spawnWorkers(
   if (workerRegistry) {
     throw new Error('workers already spawned; terminate existing registry first');
   }
+  if (workerRegistryPromise) {
+    throw new Error('workers are already spawning');
+  }
 
-  const committeePromises = Array.from({ length: COMMITTEE_WORKER_COUNT }, (_, index) =>
-    createWorkerEntry<CommitteeWorkerApi>(
-      {
-        workerId: `committee-${index + 1}`,
-        role: 'committee',
-        partyIndex: index + 1
-      },
-      new URL('./committee.worker.ts', import.meta.url),
-      engineFactory,
-      telemetrySink
-    )
-  );
+  workerRegistryPromise = (async () => {
+    const createdWorkers: Worker[] = [];
 
-  const hospitalPromises = Array.from({ length: HOSPITAL_WORKER_COUNT }, (_, index) =>
-    createWorkerEntry<HospitalWorkerApi>(
-      {
-        workerId: `hospital-${index + 1}`,
-        role: 'hospital',
-        partyIndex: index + 1
-      },
-      new URL('./hospital.worker.ts', import.meta.url),
-      engineFactory,
-      telemetrySink
-    )
-  );
+    try {
+      const trackedCreateWorker = (factory: () => Worker): (() => Worker) => {
+        return () => {
+          const worker = factory();
+          createdWorkers.push(worker);
+          return worker;
+        };
+      };
 
-  const aggregatorPromise = createWorkerEntry<AggregatorWorkerApi>(
-    {
-      workerId: 'aggregator-1',
-      role: 'aggregator'
-    },
-    new URL('./aggregator.worker.ts', import.meta.url),
-    engineFactory,
-    telemetrySink
-  );
+      const committeePromises = Array.from({ length: COMMITTEE_WORKER_COUNT }, (_, index) =>
+        createWorkerEntry<CommitteeWorkerApi>(
+          {
+            workerId: `committee-${index + 1}`,
+            role: 'committee',
+            partyIndex: index + 1
+          },
+          trackedCreateWorker(createCommitteeWorker),
+          engineFactory,
+          telemetrySink
+        )
+      );
 
-  const [committee, hospitals, aggregator] = await Promise.all([
-    Promise.all(committeePromises),
-    Promise.all(hospitalPromises),
-    aggregatorPromise
-  ]);
+      const hospitalPromises = Array.from({ length: HOSPITAL_WORKER_COUNT }, (_, index) =>
+        createWorkerEntry<HospitalWorkerApi>(
+          {
+            workerId: `hospital-${index + 1}`,
+            role: 'hospital',
+            partyIndex: index + 1
+          },
+          trackedCreateWorker(createHospitalWorker),
+          engineFactory,
+          telemetrySink
+        )
+      );
 
-  workerRegistry = {
-    committee,
-    hospitals,
-    aggregator,
-    all: [...committee, ...hospitals, aggregator]
-  };
+      const aggregatorPromise = createWorkerEntry<AggregatorWorkerApi>(
+        {
+          workerId: 'aggregator-1',
+          role: 'aggregator'
+        },
+        trackedCreateWorker(createAggregatorWorker),
+        engineFactory,
+        telemetrySink
+      );
 
-  return workerRegistry;
+      const [committee, hospitals, aggregator] = await Promise.all([
+        Promise.all(committeePromises),
+        Promise.all(hospitalPromises),
+        aggregatorPromise
+      ]);
+
+      workerRegistry = {
+        committee,
+        hospitals,
+        aggregator,
+        all: [...committee, ...hospitals, aggregator]
+      };
+
+      return workerRegistry;
+    } catch (error) {
+      for (const worker of createdWorkers) {
+        worker.terminate();
+      }
+      throw error;
+    } finally {
+      workerRegistryPromise = null;
+    }
+  })();
+
+  return workerRegistryPromise;
 }
 
 export function terminateWorkers(registry: WorkerRegistry | null = workerRegistry): void {
+  if (workerRegistryPromise && !registry) {
+    workerRegistryPromise = null;
+  }
   if (!registry) {
     workerRegistry = null;
     return;
@@ -146,8 +199,12 @@ function createRequestId(prefix: string): string {
   return `${prefix}-${crypto.randomUUID()}`;
 }
 
+export function createRoundId(): string {
+  return `round-${crypto.randomUUID()}`;
+}
+
 export async function pingWorkers(registry: WorkerRegistry): Promise<PingResponse[]> {
-  const startedAt = performance.now();
+  const startedAt = Date.now();
 
   return Promise.all(
     registry.all.map((entry) =>
@@ -170,7 +227,7 @@ export async function requestCommitteeDkg(
     ...request
   };
 
-  return Promise.all(registry.committee.map((entry) => entry.api.runDkg(message)));
+  return Promise.all(registry.committee.map((entry) => entry.api.runDkg(transferMessage(message))));
 }
 
 export async function encryptWithHospital(
@@ -183,9 +240,7 @@ export async function encryptWithHospital(
     ...request
   };
 
-  return entry.api.encrypt(
-    Comlink.transfer(message, [message.publicKeyBuffer, message.plaintextBuffer])
-  );
+  return entry.api.encrypt(transferMessage(message));
 }
 
 export async function aggregateCiphertexts(
@@ -200,14 +255,15 @@ export async function aggregateCiphertexts(
 
   const transferables = ciphertextBuffers.map((ciphertextBuffer) => ciphertextBuffer.slice(0));
 
-  return registry.aggregator.api.aggregate({
+  return registry.aggregator.api.aggregate(transferMessage({
     ...message,
-    ciphertextBuffers: Comlink.transfer(transferables, transferables)
-  });
+    ciphertextBuffers: transferables
+  }));
 }
 
 export async function requestPartialDecryptions(
   registry: WorkerRegistry,
+  roundId: string,
   ciphertextBuffer: ArrayBuffer
 ): Promise<PartialDecryptResponse[]> {
   return Promise.all(
@@ -215,18 +271,18 @@ export async function requestPartialDecryptions(
       const request: PartialDecryptRequest = {
         type: 'partial-decrypt-request',
         requestId: createRequestId('partial-decrypt'),
+        roundId,
         ciphertextBuffer: ciphertextBuffer.slice(0)
       };
 
-      return entry.api.partialDecrypt(
-        Comlink.transfer(request, [request.ciphertextBuffer])
-      );
+      return entry.api.partialDecrypt(transferMessage(request));
     })
   );
 }
 
 export async function combineDecryptionShares(
   entry: WorkerEntry<CommitteeWorkerApi>,
+  roundId: string,
   ciphertextBuffer: ArrayBuffer,
   shareBuffers: readonly ArrayBuffer[],
   partyIndices: readonly number[]
@@ -234,12 +290,11 @@ export async function combineDecryptionShares(
   const request: CombineRequest = {
     type: 'combine-request',
     requestId: createRequestId('combine'),
+    roundId,
     ciphertextBuffer,
     shareBuffers,
     partyIndices
   };
 
-  return entry.api.combine(
-    Comlink.transfer(request, [request.ciphertextBuffer, ...shareBuffers])
-  );
+  return entry.api.combine(transferMessage(request));
 }

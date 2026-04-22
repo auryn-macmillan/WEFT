@@ -19,6 +19,7 @@ import type {
 interface DemoCiphertextPayload {
   readonly kind: 'demo-ciphertext';
   readonly workerId: string;
+  readonly roundId: string;
   readonly nonce: string;
   readonly plaintextInts: readonly number[];
 }
@@ -43,16 +44,26 @@ interface DemoContributionPayload {
 interface DemoPartialSharePayload {
   readonly kind: 'demo-partial-share';
   readonly workerId: string;
+  readonly roundId: string;
   readonly partyIndex: number;
   readonly threshold: number;
   readonly nonce: string;
   readonly plaintextInts: readonly number[];
 }
 
+interface DemoPublicKeyPayload {
+  readonly kind: 'demo-public-key';
+  readonly committeeSize: number;
+  readonly threshold: number;
+  readonly roundId: string;
+  readonly seed: number;
+}
+
 interface WorkerRuntimeState {
   identity: WorkerIdentity | null;
   telemetrySink?: WorkerTelemetrySink;
   engine: CryptoEngine | null;
+  activeRoundId: string | null;
 }
 
 const textEncoder = new TextEncoder();
@@ -135,11 +146,13 @@ function splitIntoShares(values: readonly number[], threshold: number, seed: num
 
   for (let index = 0; index < values.length; index += 1) {
     const value = values[index];
-    const base = Math.trunc(value / threshold);
-    const remainder = value - base * threshold;
+    const sign = Math.sign(value) === 0 ? 1 : Math.sign(value);
+    const magnitude = Math.abs(value);
+    const baseMagnitude = Math.floor(magnitude / threshold);
+    const remainder = magnitude - baseMagnitude * threshold;
 
     for (let partyIndex = 0; partyIndex < threshold; partyIndex += 1) {
-      shares[partyIndex][index] = base;
+      shares[partyIndex][index] = baseMagnitude * sign;
     }
 
     const startIndex = hashSeed(`${seed}:${index}`) % threshold;
@@ -177,7 +190,7 @@ function sumVectors(vectors: readonly (readonly number[])[], modulus: bigint): n
 function emitTelemetry(
   state: WorkerRuntimeState,
   kind: TelemetryEventKind,
-  ciphertextPreview?: string
+  _ciphertextPreview?: string
 ): void {
   if (!state.identity || !state.telemetrySink) {
     return;
@@ -191,7 +204,7 @@ function emitTelemetry(
       kind,
       timestamp: Date.now(),
       ...(state.identity.partyIndex === undefined ? {} : { partyIndex: state.identity.partyIndex }),
-      ...(ciphertextPreview === undefined ? {} : { ciphertextPreview })
+      ciphertextPreview: 'redacted'
     }
   };
 
@@ -216,25 +229,28 @@ class DemoWorkerCryptoEngine implements CryptoEngine {
     emitTelemetry(this.#state, 'dkg-start');
     await sleep(normalizeDelay(this.#descriptor.latencyMs));
 
-    const seed = this.#descriptor.seed ?? 11;
+    const roundId = this.#state.activeRoundId ?? 'unassigned-round';
+    const seed = hashSeed(
+      `${this.#descriptor.seed ?? 0}:${roundId}:${committeeSize}:${threshold}:${this.#descriptor.params.plaintextModulus.toString()}:${this.#descriptor.params.polyDegree}`
+    );
     const publicKeyBytes = encodePayload({
       kind: 'demo-public-key',
       committeeSize,
       threshold,
+      roundId,
       seed
-    });
+    } satisfies DemoPublicKeyPayload);
 
     const shares: SecretShareBytes[] = [];
     const contributions: Uint8Array[] = [];
 
     for (let partyIndex = 1; partyIndex <= committeeSize; partyIndex += 1) {
-      const partySeed = hashSeed(`${seed}:party:${partyIndex}`);
       const shareBytes = encodePayload({
         kind: 'demo-secret-share',
         workerId: `committee-${partyIndex}`,
         partyIndex,
         threshold,
-        seed: partySeed
+        seed
       } satisfies DemoSecretSharePayload);
       const contributionBytes = encodePayload({
         kind: 'demo-dkg-contribution',
@@ -242,7 +258,7 @@ class DemoWorkerCryptoEngine implements CryptoEngine {
         partyIndex,
         threshold,
         committeeSize,
-        seed: partySeed
+        seed: hashSeed(`${seed}:contribution:${partyIndex}`)
       } satisfies DemoContributionPayload);
 
       shares.push({ bytes: shareBytes, partyIndex });
@@ -262,10 +278,12 @@ class DemoWorkerCryptoEngine implements CryptoEngine {
     emitTelemetry(this.#state, 'encrypt-start', previewHex(publicKey.bytes));
     await sleep(normalizeDelay(this.#descriptor.latencyMs));
 
+    const publicKeyPayload = decodePayload<DemoPublicKeyPayload>(publicKey.bytes);
     const payload = {
       kind: 'demo-ciphertext',
       workerId: this.#state.identity?.workerId ?? 'unknown-worker',
-      nonce: `${hashSeed(`${plaintext.length}:${previewHex(publicKey.bytes)}`)}`,
+      roundId: publicKeyPayload.roundId,
+      nonce: `${hashSeed(`${publicKeyPayload.roundId}:${this.#state.identity?.workerId ?? 'unknown-worker'}:${plaintext.length}:${previewHex(publicKey.bytes)}`)}`,
       plaintextInts: Array.from(plaintext, (value) => modNormalize(this.#descriptor.params.plaintextModulus, value))
     } satisfies DemoCiphertextPayload;
     const ciphertext = encodePayload(payload);
@@ -282,6 +300,7 @@ class DemoWorkerCryptoEngine implements CryptoEngine {
     const aggregatePayload = {
       kind: 'demo-ciphertext',
       workerId: this.#state.identity?.workerId ?? 'aggregator',
+      roundId: decoded[0]?.roundId ?? this.#state.activeRoundId ?? 'aggregate-empty',
       nonce: decoded[0]?.nonce ?? 'aggregate-empty',
       plaintextInts: sumVectors(
         decoded.map((item) => item.plaintextInts),
@@ -301,6 +320,10 @@ class DemoWorkerCryptoEngine implements CryptoEngine {
     const sharePayload = decodePayload<DemoSecretSharePayload>(share.bytes);
     const ciphertextPayload = decodePayload<DemoCiphertextPayload>(ciphertext.bytes);
 
+    if (this.#state.activeRoundId && ciphertextPayload.roundId !== this.#state.activeRoundId) {
+      throw new Error('ciphertext round mismatch');
+    }
+
     emitTelemetry(this.#state, 'partial-decrypt-start', previewHex(ciphertext.bytes));
     await sleep(normalizeDelay(this.#descriptor.latencyMs));
 
@@ -315,6 +338,7 @@ class DemoWorkerCryptoEngine implements CryptoEngine {
     const partialShareBytes = encodePayload({
       kind: 'demo-partial-share',
       workerId: this.#state.identity?.workerId ?? sharePayload.workerId,
+      roundId: ciphertextPayload.roundId,
       partyIndex: sharePayload.partyIndex,
       threshold: sharePayload.threshold,
       nonce: ciphertextPayload.nonce,
@@ -339,6 +363,7 @@ class DemoWorkerCryptoEngine implements CryptoEngine {
       throw new Error('no decryption shares provided');
     }
 
+    const ciphertextPayload = decodePayload<DemoCiphertextPayload>(ciphertext.bytes);
     const decodedShares = shares.map((share) => decodePayload<DemoPartialSharePayload>(share.bytes));
     const threshold = decodedShares[0]?.threshold ?? 0;
     if (shares.length < threshold) {
@@ -350,9 +375,16 @@ class DemoWorkerCryptoEngine implements CryptoEngine {
       if (share.threshold !== threshold) {
         throw new Error('share threshold mismatch');
       }
+      if (share.roundId !== ciphertextPayload.roundId) {
+        throw new Error('share round mismatch');
+      }
       if (share.nonce !== nonce) {
         throw new Error('share nonce mismatch');
       }
+    }
+
+    if (ciphertextPayload.nonce !== nonce) {
+      throw new Error('ciphertext/share nonce mismatch');
     }
 
     const combined = sumVectors(
@@ -376,7 +408,8 @@ export function createWorkerRuntimeState(): WorkerRuntimeState {
   return {
     identity: null,
     telemetrySink: undefined,
-    engine: null
+    engine: null,
+    activeRoundId: null
   };
 }
 
@@ -393,9 +426,27 @@ export async function configureWorkerRuntime(
   bootstrap: WorkerBootstrap,
   telemetrySink?: WorkerTelemetrySink
 ): Promise<void> {
+  if (state.engine || state.identity) {
+    throw new Error('worker is already configured');
+  }
+
   state.identity = bootstrap.identity;
   state.telemetrySink = telemetrySink;
   state.engine = createEngineFromDescriptor(bootstrap.engine, state);
+}
+
+export function activateWorkerRound(state: WorkerRuntimeState, roundId: string): void {
+  state.activeRoundId = roundId;
+}
+
+export function assertWorkerRound(state: WorkerRuntimeState, roundId: string): void {
+  if (!state.activeRoundId || state.activeRoundId !== roundId) {
+    throw new Error(`worker round mismatch: expected ${state.activeRoundId ?? 'none'}, received ${roundId}`);
+  }
+}
+
+export function clearWorkerRound(state: WorkerRuntimeState): void {
+  state.activeRoundId = null;
 }
 
 export function cloneTransferredBuffer(buffer: ArrayBuffer): ArrayBuffer {

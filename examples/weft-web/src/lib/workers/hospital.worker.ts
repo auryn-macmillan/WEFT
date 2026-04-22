@@ -28,7 +28,7 @@ const hospitalApi: HospitalWorkerApi = {
   async ping(request: PingRequest): Promise<PingResponse> {
     ensureRuntimeConfigured(runtimeState);
 
-    const now = performance.now();
+    const now = Date.now();
     return {
       type: 'ping-response',
       requestId: request.requestId,
@@ -49,13 +49,13 @@ const hospitalApi: HospitalWorkerApi = {
     );
     const ciphertextBuffer = bytesToBuffer(ciphertext.bytes);
 
-    return {
+    return Comlink.transfer({
       type: 'encrypt-response',
       requestId: request.requestId,
       workerId: runtimeState.identity.workerId,
       hospitalId: request.hospitalId,
-      ciphertextBuffer: Comlink.transfer(ciphertextBuffer, [ciphertextBuffer])
-    };
+      ciphertextBuffer
+    }, [ciphertextBuffer]);
   }
 };
 

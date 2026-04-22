@@ -13,8 +13,11 @@ import type {
   WorkerTelemetrySink
 } from './messages';
 import {
+  activateWorkerRound,
+  assertWorkerRound,
   bufferToBytes,
   bytesToBuffer,
+  clearWorkerRound,
   cloneTransferredBuffer,
   configureWorkerRuntime,
   createWorkerRuntimeState,
@@ -32,7 +35,7 @@ const committeeApi: CommitteeWorkerApi = {
   async ping(request: PingRequest): Promise<PingResponse> {
     ensureRuntimeConfigured(runtimeState);
 
-    const now = performance.now();
+    const now = Date.now();
     return {
       type: 'ping-response',
       requestId: request.requestId,
@@ -46,6 +49,7 @@ const committeeApi: CommitteeWorkerApi = {
   async runDkg(request: DkgRequest): Promise<DkgContribution> {
     ensureRuntimeConfigured(runtimeState);
 
+    activateWorkerRound(runtimeState, request.roundId);
     const transcript = await runtimeState.engine.runDkg(request.committeeSize, request.threshold);
     const secretShare = transcript.perPartyShares.find(
       (candidate) => candidate.partyIndex === runtimeState.identity.partyIndex
@@ -62,19 +66,19 @@ const committeeApi: CommitteeWorkerApi = {
     const secretShareBuffer = bytesToBuffer(secretShare.bytes);
     activeSecretShareBuffer = cloneTransferredBuffer(secretShareBuffer);
 
-    return {
+    return Comlink.transfer({
       type: 'dkg-contribution',
       requestId: request.requestId,
       workerId: runtimeState.identity.workerId,
       partyIndex: runtimeState.identity.partyIndex ?? secretShare.partyIndex,
-      publicKeyBuffer: Comlink.transfer(publicKeyBuffer, [publicKeyBuffer]),
-      contributionBuffer: Comlink.transfer(contributionBuffer, [contributionBuffer]),
-      secretShareBuffer: Comlink.transfer(secretShareBuffer, [secretShareBuffer])
-    };
+      publicKeyBuffer,
+      contributionBuffer
+    }, [publicKeyBuffer, contributionBuffer]);
   },
 
   async partialDecrypt(request: PartialDecryptRequest): Promise<PartialDecryptResponse> {
     ensureRuntimeConfigured(runtimeState);
+    assertWorkerRound(runtimeState, request.roundId);
     const partyIndex = runtimeState.identity.partyIndex;
 
     if (!partyIndex) {
@@ -94,17 +98,18 @@ const committeeApi: CommitteeWorkerApi = {
     );
 
     const shareBuffer = bytesToBuffer(share.bytes);
-    return {
+    return Comlink.transfer({
       type: 'partial-decrypt-response',
       requestId: request.requestId,
       workerId: runtimeState.identity.workerId,
       partyIndex: share.partyIndex,
-      shareBuffer: Comlink.transfer(shareBuffer, [shareBuffer])
-    };
+      shareBuffer
+    }, [shareBuffer]);
   },
 
   async combine(request: CombineRequest): Promise<ArrayBuffer> {
     ensureRuntimeConfigured(runtimeState);
+    assertWorkerRound(runtimeState, request.roundId);
 
     const shares = request.shareBuffers.map((shareBuffer, index) => ({
       bytes: bufferToBytes(cloneTransferredBuffer(shareBuffer)),
@@ -117,6 +122,8 @@ const committeeApi: CommitteeWorkerApi = {
       plaintext.byteOffset,
       plaintext.byteOffset + plaintext.byteLength
     );
+    activeSecretShareBuffer = null;
+    clearWorkerRound(runtimeState);
     return Comlink.transfer(plaintextBuffer as ArrayBuffer, [plaintextBuffer as ArrayBuffer]);
   }
 };
