@@ -6,12 +6,10 @@ import type {
   DkgTranscript,
   PublicKeyBytes,
   SecretShareBytes,
-  TelemetryEmitter,
   TelemetryEventKind
 } from '$lib/crypto/engine';
 import type {
   DemoWorkerEngineDescriptor,
-  WorkerApi,
   WorkerBootstrap,
   WorkerIdentity,
   WorkerTelemetryEnvelope,
@@ -382,7 +380,9 @@ export function createWorkerRuntimeState(): WorkerRuntimeState {
   };
 }
 
-export function ensureRuntimeConfigured<T extends WorkerApi>(state: WorkerRuntimeState): asserts state is WorkerRuntimeState & { identity: WorkerIdentity; engine: CryptoEngine } {
+export function ensureRuntimeConfigured(
+  state: WorkerRuntimeState
+): asserts state is WorkerRuntimeState & { identity: WorkerIdentity; engine: CryptoEngine } {
   if (!state.identity || !state.engine) {
     throw new Error('worker must be configured before use');
   }

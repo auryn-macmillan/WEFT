@@ -18,7 +18,6 @@ import type {
   WorkerBootstrap,
   WorkerEngineDescriptor,
   WorkerIdentity,
-  WorkerTelemetryEnvelope,
   WorkerTelemetrySink
 } from './messages';
 
@@ -54,7 +53,7 @@ async function createWorkerEntry<Api extends object>(
     identity,
     engine: engineFactory(identity)
   };
-  const configure = (api as Comlink.Remote<{ configure(bootstrap: WorkerBootstrap, telemetrySink?: WorkerTelemetrySink): Promise<void> }>);
+  const configure = (api as unknown as Comlink.Remote<{ configure(bootstrap: WorkerBootstrap, telemetrySink?: WorkerTelemetrySink): Promise<void> }>);
 
   await configure.configure(
     bootstrap,
