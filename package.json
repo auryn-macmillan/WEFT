@@ -5,14 +5,19 @@
   "type": "module",
   "workspaces": [
     "client",
-    "coordinator"
+    "coordinator",
+    "examples/weft-web"
   ],
   "scripts": {
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces --if-present",
     "test:client": "npm test -w client",
     "test:coordinator": "npm test -w coordinator",
-    "demo": "npx tsx scripts/run-round.ts"
+    "demo": "npx tsx scripts/run-round.ts",
+    "weft-web:dev": "pnpm --dir examples/weft-web dev",
+    "weft-web:build": "pnpm --dir examples/weft-web build",
+    "weft-web:test": "pnpm --dir examples/weft-web test",
+    "weft-web:wasm:build": "wasm-pack build --release --target web examples/weft-web/crates/fhe-wasm --out-dir ../../packages/fhe-wasm/pkg"
   },
   "devDependencies": {
     "tsx": "^4.0.0",
