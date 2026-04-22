@@ -1,0 +1,5 @@
+[GET] http://127.0.0.1:8000/index.html => [200] OK
+[GET] http://127.0.0.1:8000/main.js => [200] OK
+[GET] http://127.0.0.1:8000/worker.js => [200] OK
+[GET] http://127.0.0.1:8000/pkg/fhe_wasm_spike.js => [200] OK
+[GET] http://127.0.0.1:8000/pkg/fhe_wasm_spike_bg.wasm => [200] OK

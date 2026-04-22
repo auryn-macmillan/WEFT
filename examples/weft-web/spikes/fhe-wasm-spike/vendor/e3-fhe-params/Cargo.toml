@@ -1,0 +1,7 @@
+[package]
+name = "e3-fhe-params"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fhe = { path = "../fhe-rs/crates/fhe" }
