@@ -1,0 +1,19 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on artifact directory
+    Finished `release` profile [optimized] target(s) in 0.10s
+     Running unittests src/lib.rs (target/release/deps/fhe_wasm-fdab62aa1e540b1d)
+
+running 2 tests
+test threshold::tests::below_threshold_fails ... ok
+test threshold::tests::threshold_round_3_of_5 ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 1.14s
+
+     Running unittests src/bin/fixture-gen.rs (target/release/deps/fixture_gen-928356fb9a52ed42)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

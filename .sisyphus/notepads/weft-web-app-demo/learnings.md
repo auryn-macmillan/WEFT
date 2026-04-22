@@ -14,3 +14,15 @@
 - `PublicKey::new` and `SecretKey::try_encrypt` in fhe.rs both call `thread_rng()` internally to seed the `a` polynomial — passing a deterministic `rng` to them does NOT prevent non-determinism.
 - `SecretKey::try_encrypt_with_seed(pt, seed, rng)` is the only deterministic encryption path; both `seed` ([u8; 32]) and `rng` must be drawn from the same `ChaCha20Rng` to guarantee bit-identical output across runs.
 - Do not use `PublicKey` at all in the fixture generator — remove it entirely and rely on secret-key-mode encryption.
+
+## [2026-04-22] T13: PhaseShell + phase store
+- Created `phaseStore` utilizing Svelte's `writable` with `sessionStorage` for persistence, avoiding SSR errors with `$app/environment` `browser` check.
+- Added `PhaseShell` which serves as the layout wrapper utilizing `ProgressiveDisclosure` via named slots for various depth levels, mapping content using the `PHASES` array from `content/phases.ts`.
+- Developed `PhaseProgress` demonstrating a visual track of 8 dots, enabling navigation between completed phases but disabling future ones.
+- Keyboard bindings (Enter, Escape) handle jump and playback controls properly across these elements.
+- Ensure slots correctly pass along attributes to match `ProgressiveDisclosure`'s nested scoped patterns.
+
+## [2026-04-22] T15: trbfv WASM port
+- The vendored `fhe-rs` threshold code was already wasm-safe enough once `fhe::lib` re-exported `mbfv`, `trbfv`, and `proto::trbfv`; no extra rayon stripping was needed in this crate because the vendored trbfv path already runs sequentially.
+- For wasm bindings, the cleanest boundary is JSON envelopes plus vendored protobuf helpers: round-1 emits serialized per-recipient share matrices, round-2 returns serialized `(sk_poly, es_poly)` bundles, and partial decrypt / combine reuse `serialize_*` and `deserialize_*` from `fhe::proto::trbfv`.
+- Deterministic parity tests need a deterministic CRP seed shared by all parties and deterministic per-party RNG seeds; below-threshold combine must fail before decryption instead of trying to interpolate with too few shares.

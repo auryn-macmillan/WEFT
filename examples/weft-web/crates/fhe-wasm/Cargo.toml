@@ -16,6 +16,7 @@ fhe = { path = "vendor/fhe-rs/crates/fhe" }
 fhe-traits = { path = "vendor/fhe-rs/crates/fhe-traits" }
 getrandom = { version = "0.2", features = ["js"] }
 js-sys = "0.3.95"
+ndarray = "0.15.6"
 rand = "0.8.5"
 rand_chacha = "0.3.1"
 serde = { version = "1", features = ["derive"] }
