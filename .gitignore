@@ -7,3 +7,27 @@ pkg/
 *.tsbuildinfo
 .env
 .env.*
+
+# Logs and dev artifacts
+*.log
+dev.log
+
+# Playwright MCP session logs
+.playwright-mcp/
+
+# Bundle visualizer output
+stats.html
+
+# Ad-hoc screenshots at repo root
+task-*.png
+
+# Sisyphus internal scratch (plans + boulder + evidence stay tracked)
+.sisyphus/screenshots/
+.sisyphus/notepads/
+examples/**/.sisyphus/
+
+# Playwright reports
+playwright-a11y-report/
+playwright-report/
+test-results/
+
