@@ -1,0 +1,37 @@
+Task T7 — Fixture Coverage Evidence
+=====================================
+
+Date: 2026-04-22
+
+Total cases: 22 (requirement: ≥20) ✓
+
+Case list:
+  1.  single-encrypt-decrypt       — 1 client, 1 grad, 1 chunk
+  2.  sum-n2                       — 2 clients, 3 grads, 1 chunk
+  3.  sum-n3                       — 3 clients, 3 grads, 1 chunk
+  4.  sum-n5                       — 5 clients, 5 grads, 1 chunk
+  5.  sum-n10                      — 10 clients, 5 grads, 1 chunk
+  6.  threshold-3-of-5             — 3 clients, 5 grads, 1 chunk
+  7.  threshold-3-of-5-negative    — 3 clients, 2 grads (negative), 1 chunk
+  8.  threshold-3-of-5-zero        — 3 clients, 3 grads (all zero), 1 chunk
+  9.  chunk-boundary-8192          — 1 client, 8192 grads (exactly 1 chunk)
+  10. chunk-boundary-8193          — 1 client, 8193 grads (2 chunks)
+  11. case-01-single-zero          — 1 client, 1 grad (0.0), 1 chunk
+  12. case-02-single-max-positive  — 1 client, 1 grad (1.0), 1 chunk
+  13. case-03-single-max-negative  — 1 client, 1 grad (-1.0), 1 chunk
+  14. case-04-two-clients-cancel   — 2 clients, 3 grads (summing to zero), 1 chunk
+  15. case-05-large-coeffs         — 5 clients, 8 grads, 1 chunk
+  16. case-06-alternating-signs    — 3 clients, 4 grads (alternating ±), 1 chunk
+  17. case-07-near-overflow-boundary — 3 clients, 4 grads (boundary values), 1 chunk
+  18. case-08-single-chunk-16      — 1 client, 16 grads, 1 chunk
+  19. case-09-multi-client-16      — 3 clients, 16 grads, 1 chunk
+  20. case-10-repeated-values      — 3 clients, 8 grads (all 0.25), 1 chunk
+  21. case-11-ascending            — 2 clients, 10 grads (ascending/descending), 1 chunk
+  22. case-12-five-clients-mixed   — 5 clients, 12 grads, 1 chunk
+
+Coverage dimensions:
+  - Client counts: 1, 2, 3, 5, 10
+  - Chunk counts: 1 chunk, 2 chunks (cross-boundary)
+  - Special values: zero, max positive, max negative, cancellation, alternating signs
+  - Sizes: 1 grad up to 8193 grads
+  - All 22 cases pass homomorphic sum correctness assertion before writing output

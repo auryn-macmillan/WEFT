@@ -1,0 +1,25 @@
+{
+  "id": "single-encrypt-decrypt",
+  "seed": "2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a",
+  "params": {
+    "preset": "SecureThreshold8192",
+    "degree": 8192,
+    "plaintext_modulus": 131072
+  },
+  "inputs": [
+    {
+      "plaintextCoeffs": [
+        2048
+      ],
+      "client_index": 0
+    }
+  ],
+  "expected": {
+    "combinedPlaintext": [
+      2048
+    ],
+    "ciphertextFingerprint": "5c1d21399486c45c",
+    "num_chunks": 1
+  },
+  "format": "v1"
+}

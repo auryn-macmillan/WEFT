@@ -1,0 +1,123 @@
+{
+  "id": "sum-n10",
+  "seed": "2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a",
+  "params": {
+    "preset": "SecureThreshold8192",
+    "degree": 8192,
+    "plaintext_modulus": 131072
+  },
+  "inputs": [
+    {
+      "plaintextCoeffs": [
+        1948,
+        2580,
+        128995,
+        129218,
+        2912
+      ],
+      "client_index": 0
+    },
+    {
+      "plaintextCoeffs": [
+        127305,
+        3268,
+        2283,
+        128294,
+        2135
+      ],
+      "client_index": 1
+    },
+    {
+      "plaintextCoeffs": [
+        2615,
+        223,
+        742,
+        128198,
+        1977
+      ],
+      "client_index": 2
+    },
+    {
+      "plaintextCoeffs": [
+        3497,
+        127184,
+        128276,
+        198,
+        129338
+      ],
+      "client_index": 3
+    },
+    {
+      "plaintextCoeffs": [
+        128191,
+        2590,
+        3527,
+        2745,
+        127761
+      ],
+      "client_index": 4
+    },
+    {
+      "plaintextCoeffs": [
+        126987,
+        128748,
+        68,
+        2011,
+        3344
+      ],
+      "client_index": 5
+    },
+    {
+      "plaintextCoeffs": [
+        2099,
+        130462,
+        1261,
+        1516,
+        846
+      ],
+      "client_index": 6
+    },
+    {
+      "plaintextCoeffs": [
+        128265,
+        134,
+        129434,
+        129875,
+        129400
+      ],
+      "client_index": 7
+    },
+    {
+      "plaintextCoeffs": [
+        2974,
+        129477,
+        1799,
+        128165,
+        1060
+      ],
+      "client_index": 8
+    },
+    {
+      "plaintextCoeffs": [
+        128077,
+        3481,
+        128938,
+        550,
+        568
+      ],
+      "client_index": 9
+    }
+  ],
+  "expected": {
+    "combinedPlaintext": [
+      127670,
+      3859,
+      1035,
+      126482,
+      6125
+    ],
+    "ciphertextFingerprint": "9a2c0039275123d7",
+    "num_chunks": 1
+  },
+  "format": "v1"
+}

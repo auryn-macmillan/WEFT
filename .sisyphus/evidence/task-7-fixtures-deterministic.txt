@@ -1,0 +1,26 @@
+Task T7 — Determinism Evidence
+==============================
+
+Date: 2026-04-22
+
+Test: two consecutive runs of fixture-gen binary produce bit-identical output.
+
+Command:
+  ./target/release/fixture-gen /tmp/fx1
+  ./target/release/fixture-gen /tmp/fx2
+  diff -r /tmp/fx1 /tmp/fx2
+
+Result: no diff output — runs are bit-identical.
+
+Root cause of prior non-determinism:
+  fhe.rs PublicKey::new and SecretKey::try_encrypt both call thread_rng() internally
+  to seed the `a` polynomial, bypassing any caller-provided RNG.
+
+Fix applied:
+  Replaced PublicKey-based encryption with SecretKey::try_encrypt_with_seed(pt, seed, rng).
+  The `seed` ([u8; 32]) is drawn from ChaCha20Rng::from_seed([42u8; 32]) before each
+  encrypt call, making the entire generation pipeline fully deterministic.
+
+Binary: examples/weft-web/crates/fhe-wasm/src/bin/fixture-gen.rs
+Master seed: 2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a (32×0x2a)
+Cases generated: 22

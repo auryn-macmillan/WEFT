@@ -1,0 +1,25 @@
+{
+  "id": "case-01-single-zero",
+  "seed": "2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a",
+  "params": {
+    "preset": "SecureThreshold8192",
+    "degree": 8192,
+    "plaintext_modulus": 131072
+  },
+  "inputs": [
+    {
+      "plaintextCoeffs": [
+        0
+      ],
+      "client_index": 0
+    }
+  ],
+  "expected": {
+    "combinedPlaintext": [
+      0
+    ],
+    "ciphertextFingerprint": "21756fed6a81d9dc",
+    "num_chunks": 1
+  },
+  "format": "v1"
+}

@@ -1,0 +1,65 @@
+{
+  "id": "case-10-repeated-values",
+  "seed": "2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a",
+  "params": {
+    "preset": "SecureThreshold8192",
+    "degree": 8192,
+    "plaintext_modulus": 131072
+  },
+  "inputs": [
+    {
+      "plaintextCoeffs": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "client_index": 0
+    },
+    {
+      "plaintextCoeffs": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "client_index": 1
+    },
+    {
+      "plaintextCoeffs": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "client_index": 2
+    }
+  ],
+  "expected": {
+    "combinedPlaintext": [
+      3072,
+      3072,
+      3072,
+      3072,
+      3072,
+      3072,
+      3072,
+      3072
+    ],
+    "ciphertextFingerprint": "f17f3e22117077d7",
+    "num_chunks": 1
+  },
+  "format": "v1"
+}

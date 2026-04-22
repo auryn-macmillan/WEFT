@@ -1,0 +1,49 @@
+{
+  "id": "case-07-near-overflow-boundary",
+  "seed": "2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a",
+  "params": {
+    "preset": "SecureThreshold8192",
+    "degree": 8192,
+    "plaintext_modulus": 131072
+  },
+  "inputs": [
+    {
+      "plaintextCoeffs": [
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "client_index": 0
+    },
+    {
+      "plaintextCoeffs": [
+        126976,
+        126976,
+        126976,
+        126976
+      ],
+      "client_index": 1
+    },
+    {
+      "plaintextCoeffs": [
+        2048,
+        2048,
+        2048,
+        2048
+      ],
+      "client_index": 2
+    }
+  ],
+  "expected": {
+    "combinedPlaintext": [
+      2048,
+      2048,
+      2048,
+      2048
+    ],
+    "ciphertextFingerprint": "ac6a9f63958a0c2a",
+    "num_chunks": 1
+  },
+  "format": "v1"
+}

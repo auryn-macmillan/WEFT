@@ -1,0 +1,73 @@
+{
+  "id": "sum-n5",
+  "seed": "2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a",
+  "params": {
+    "preset": "SecureThreshold8192",
+    "degree": 8192,
+    "plaintext_modulus": 131072
+  },
+  "inputs": [
+    {
+      "plaintextCoeffs": [
+        128131,
+        1579,
+        129893,
+        130905,
+        3051
+      ],
+      "client_index": 0
+    },
+    {
+      "plaintextCoeffs": [
+        128507,
+        129169,
+        4063,
+        130971,
+        3914
+      ],
+      "client_index": 1
+    },
+    {
+      "plaintextCoeffs": [
+        130629,
+        127362,
+        1756,
+        1284,
+        127739
+      ],
+      "client_index": 2
+    },
+    {
+      "plaintextCoeffs": [
+        3605,
+        2557,
+        888,
+        128008,
+        2592
+      ],
+      "client_index": 3
+    },
+    {
+      "plaintextCoeffs": [
+        3175,
+        2609,
+        130766,
+        1962,
+        128875
+      ],
+      "client_index": 4
+    }
+  ],
+  "expected": {
+    "combinedPlaintext": [
+      831,
+      1132,
+      5222,
+      130986,
+      4027
+    ],
+    "ciphertextFingerprint": "3f8b812a0274689e",
+    "num_chunks": 1
+  },
+  "format": "v1"
+}

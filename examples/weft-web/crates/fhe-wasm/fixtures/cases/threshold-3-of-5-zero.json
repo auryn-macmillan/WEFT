@@ -1,0 +1,45 @@
+{
+  "id": "threshold-3-of-5-zero",
+  "seed": "2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a",
+  "params": {
+    "preset": "SecureThreshold8192",
+    "degree": 8192,
+    "plaintext_modulus": 131072
+  },
+  "inputs": [
+    {
+      "plaintextCoeffs": [
+        0,
+        0,
+        0
+      ],
+      "client_index": 0
+    },
+    {
+      "plaintextCoeffs": [
+        0,
+        0,
+        0
+      ],
+      "client_index": 1
+    },
+    {
+      "plaintextCoeffs": [
+        0,
+        0,
+        0
+      ],
+      "client_index": 2
+    }
+  ],
+  "expected": {
+    "combinedPlaintext": [
+      0,
+      0,
+      0
+    ],
+    "ciphertextFingerprint": "03152a8841943e75",
+    "num_chunks": 1
+  },
+  "format": "v1"
+}

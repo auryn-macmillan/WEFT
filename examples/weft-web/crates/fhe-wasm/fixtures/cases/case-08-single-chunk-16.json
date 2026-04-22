@@ -1,0 +1,55 @@
+{
+  "id": "case-08-single-chunk-16",
+  "seed": "2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a",
+  "params": {
+    "preset": "SecureThreshold8192",
+    "degree": 8192,
+    "plaintext_modulus": 131072
+  },
+  "inputs": [
+    {
+      "plaintextCoeffs": [
+        128455,
+        129704,
+        2933,
+        129420,
+        1334,
+        3942,
+        1576,
+        3080,
+        2776,
+        130407,
+        128705,
+        1365,
+        129668,
+        3,
+        127460,
+        3815
+      ],
+      "client_index": 0
+    }
+  ],
+  "expected": {
+    "combinedPlaintext": [
+      128455,
+      129704,
+      2933,
+      129420,
+      1334,
+      3942,
+      1576,
+      3080,
+      2776,
+      130407,
+      128705,
+      1365,
+      129668,
+      3,
+      127460,
+      3815
+    ],
+    "ciphertextFingerprint": "86fedacb536198d8",
+    "num_chunks": 1
+  },
+  "format": "v1"
+}

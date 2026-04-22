@@ -1,0 +1,37 @@
+{
+  "id": "case-04-two-clients-cancel",
+  "seed": "2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a",
+  "params": {
+    "preset": "SecureThreshold8192",
+    "degree": 8192,
+    "plaintext_modulus": 131072
+  },
+  "inputs": [
+    {
+      "plaintextCoeffs": [
+        2048,
+        129024,
+        1024
+      ],
+      "client_index": 0
+    },
+    {
+      "plaintextCoeffs": [
+        129024,
+        2048,
+        130048
+      ],
+      "client_index": 1
+    }
+  ],
+  "expected": {
+    "combinedPlaintext": [
+      0,
+      0,
+      0
+    ],
+    "ciphertextFingerprint": "1688d7216d18ecba",
+    "num_chunks": 1
+  },
+  "format": "v1"
+}

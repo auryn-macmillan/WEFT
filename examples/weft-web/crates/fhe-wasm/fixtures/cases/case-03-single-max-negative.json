@@ -1,0 +1,25 @@
+{
+  "id": "case-03-single-max-negative",
+  "seed": "2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a",
+  "params": {
+    "preset": "SecureThreshold8192",
+    "degree": 8192,
+    "plaintext_modulus": 131072
+  },
+  "inputs": [
+    {
+      "plaintextCoeffs": [
+        126976
+      ],
+      "client_index": 0
+    }
+  ],
+  "expected": {
+    "combinedPlaintext": [
+      126976
+    ],
+    "ciphertextFingerprint": "c19b05bfad745821",
+    "num_chunks": 1
+  },
+  "format": "v1"
+}

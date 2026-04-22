@@ -1,0 +1,91 @@
+{
+  "id": "case-05-large-coeffs",
+  "seed": "2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a",
+  "params": {
+    "preset": "SecureThreshold8192",
+    "degree": 8192,
+    "plaintext_modulus": 131072
+  },
+  "inputs": [
+    {
+      "plaintextCoeffs": [
+        731,
+        129034,
+        130969,
+        728,
+        2788,
+        127708,
+        396,
+        130021
+      ],
+      "client_index": 0
+    },
+    {
+      "plaintextCoeffs": [
+        130514,
+        3021,
+        4095,
+        129127,
+        476,
+        128467,
+        127768,
+        1071
+      ],
+      "client_index": 1
+    },
+    {
+      "plaintextCoeffs": [
+        129635,
+        128309,
+        129152,
+        130180,
+        2521,
+        3995,
+        1988,
+        127666
+      ],
+      "client_index": 2
+    },
+    {
+      "plaintextCoeffs": [
+        1798,
+        128315,
+        127792,
+        129444,
+        130870,
+        3424,
+        130738,
+        127435
+      ],
+      "client_index": 3
+    },
+    {
+      "plaintextCoeffs": [
+        290,
+        1468,
+        3616,
+        128862,
+        425,
+        128026,
+        127117,
+        131054
+      ],
+      "client_index": 4
+    }
+  ],
+  "expected": {
+    "combinedPlaintext": [
+      824,
+      128003,
+      2408,
+      125125,
+      6008,
+      129476,
+      125863,
+      124031
+    ],
+    "ciphertextFingerprint": "10a16701904e8194",
+    "num_chunks": 1
+  },
+  "format": "v1"
+}

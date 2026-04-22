@@ -1,0 +1,49 @@
+{
+  "id": "case-06-alternating-signs",
+  "seed": "2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a",
+  "params": {
+    "preset": "SecureThreshold8192",
+    "degree": 8192,
+    "plaintext_modulus": 131072
+  },
+  "inputs": [
+    {
+      "plaintextCoeffs": [
+        2048,
+        129024,
+        2048,
+        129024
+      ],
+      "client_index": 0
+    },
+    {
+      "plaintextCoeffs": [
+        130048,
+        1024,
+        130048,
+        1024
+      ],
+      "client_index": 1
+    },
+    {
+      "plaintextCoeffs": [
+        410,
+        130662,
+        410,
+        130662
+      ],
+      "client_index": 2
+    }
+  ],
+  "expected": {
+    "combinedPlaintext": [
+      1434,
+      129638,
+      1434,
+      129638
+    ],
+    "ciphertextFingerprint": "997d1a2c1625246b",
+    "num_chunks": 1
+  },
+  "format": "v1"
+}
