@@ -32,8 +32,8 @@
    ========================================================================== */
 :root {
   /* Colors: Core */
-  --color-primary: #1a9e8f; /* Warm teal */
-  --color-secondary: #e86f5a; /* Coral */
+  --color-primary: #127368;
+  --color-secondary: #d64d36;
   
   /* Colors: Neutral Scale (9 steps from #fafafa to #0f0f0f) */
   --color-neutral-100: #fafafa;
@@ -41,7 +41,7 @@
   --color-neutral-300: #e5e5e5;
   --color-neutral-400: #d4d4d4;
   --color-neutral-500: #a3a3a3;
-  --color-neutral-600: #737373;
+  --color-neutral-600: #5c5c5c;
   --color-neutral-700: #525252;
   --color-neutral-800: #262626;
   --color-neutral-900: #0f0f0f;

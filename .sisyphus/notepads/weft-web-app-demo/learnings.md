@@ -66,3 +66,7 @@
 - Playwright perf config uses `workers: 1` and `fullyParallel: false` to avoid contention between iterations on the same dev server.
 - Per-run FCP/TTI measured via `performance.getEntriesByType('navigation')[0]` and `performance.getEntriesByName('first-contentful-paint')`.
 - WASM engine timings (DKG p50/p95, encrypt, homagg, decrypt) require `VITE_CRYPTO_ENGINE=wasm`; spec warns and skips gracefully when not set.
+
+## [2026-04-22] T29: A11y
+- WCAG 2.2 AA accessibility requires checking contrast ratio, properly mapping SVG attributes (`aria-hidden` or `<title>` + `<desc>`), ensuring `tab` widgets have `aria-expanded`/`aria-selected`, and all routes have descriptive `<title>` tags.
+- Playwright + `@axe-core/playwright` is highly effective in validating 10 separate routes rapidly.

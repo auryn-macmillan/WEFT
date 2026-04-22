@@ -86,6 +86,7 @@
 				type="button"
 				role="tab"
 				aria-selected={level === l}
+				aria-expanded={level === l}
 				class="pill-segment"
 				class:active={level === l}
 				on:click={() => level = l}
