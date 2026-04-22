@@ -1,0 +1,14 @@
+
+> weft-web@ test:unit /home/dev/repo/examples/weft-web
+> vitest run src/lib/crypto
+
+
+ RUN  v2.1.9 /home/dev/repo/examples/weft-web
+
+ ✓ src/lib/crypto/__tests__/overflow.test.ts (5 tests) 3ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  02:11:01
+   Duration  274ms (transform 57ms, setup 0ms, collect 38ms, tests 3ms, environment 0ms, prepare 82ms)
+

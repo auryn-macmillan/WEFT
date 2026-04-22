@@ -1,0 +1,6 @@
+{
+  "name": "@weft/fhe-wasm",
+  "version": "0.1.0",
+  "main": "pkg/fhe-wasm.js",
+  "files": ["pkg/"]
+}

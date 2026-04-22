@@ -1,0 +1,18 @@
+
+> weft-web@ check /home/dev/repo/examples/weft-web
+> svelte-kit sync && svelte-check --tsconfig ./tsconfig.json
+
+Loading svelte-check in workspace: /home/dev/repo/examples/weft-web
+Getting Svelte diagnostics...
+
+/home/dev/repo/examples/weft-web/src/lib/workers/registry.ts:57:22
+Error: Conversion of type 'Remote<Api>' to type 'Remote<{ configure(bootstrap: WorkerBootstrap, telemetrySink?: WorkerTelemetrySink | undefined): Promise<void>; }>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'configure' is missing in type 'Remote<Api>' but required in type 'RemoteObject<{ configure(bootstrap: WorkerBootstrap, telemetrySink?: WorkerTelemetrySink | undefined): Promise<void>; }>'. 
+  };
+  const configure = (api as Comlink.Remote<{ configure(bootstrap: WorkerBootstrap, telemetrySink?: WorkerTelemetrySink): Promise<void> }>);
+
+====================================
+svelte-check found 1 error and 0 warnings in 1 file
+/home/dev/repo/examples/weft-web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  weft-web@ check: `svelte-kit sync && svelte-check --tsconfig ./tsconfig.json`
+Exit status 1

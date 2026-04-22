@@ -1,0 +1,6 @@
+Workspace scaffolding added for pnpm + Cargo integration.
+
+Root pnpm workspace now includes the repo root, examples/weft-web, and its packages subtree.
+Root Cargo workspace now includes secure-process and examples/weft-web/crates/fhe-wasm.
+
+Added placeholder fhe-wasm crate/package manifests and new weft-web scripts.

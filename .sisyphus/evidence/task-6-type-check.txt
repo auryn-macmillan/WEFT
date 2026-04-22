@@ -1,0 +1,8 @@
+
+> weft-web@ check /home/dev/repo/examples/weft-web
+> svelte-kit sync && svelte-check --tsconfig ./tsconfig.json
+
+Loading svelte-check in workspace: /home/dev/repo/examples/weft-web
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { MockCryptoEngine, type TelemetryEvent } from '../mock';
+import { MockCryptoEngine } from '../mock';
+import type { TelemetryEvent } from '../engine';
 
 function toInts(values: readonly number[]): Int32Array {
   return new Int32Array(values.map((value) => Math.trunc(value)));
@@ -27,7 +28,7 @@ describe('MockCryptoEngine', () => {
 
     const aggregated = await engine.aggregateCiphertexts(ciphertexts);
     const shares = await Promise.all(perPartyShares.slice(0, 3).map((share) => engine.partialDecrypt(share, aggregated)));
-    const combined = await engine.combineDecryptionShares(shares, aggregated, 3);
+    const combined = await engine.combineDecryptionShares(shares, aggregated);
 
     expect(Array.from(combined)).toEqual([13, -1, 11, 67]);
     expect(events).toHaveLength(18);
@@ -44,7 +45,7 @@ describe('MockCryptoEngine', () => {
     ]);
 
     const shares = await Promise.all(perPartyShares.slice(0, 3).map((share) => engine.partialDecrypt(share, aggregated)));
-    expect(Array.from(await engine.combineDecryptionShares(shares, aggregated, 3))).toEqual([-80, 0, 80]);
+    expect(Array.from(await engine.combineDecryptionShares(shares, aggregated))).toEqual([-80, 0, 80]);
   });
 
   it('fails below threshold', async () => {
@@ -52,6 +53,6 @@ describe('MockCryptoEngine', () => {
     const { publicKey, perPartyShares } = await engine.runDkg(5, 3);
     const aggregated = await engine.aggregateCiphertexts([await engine.encryptVector(publicKey, toInts([1, 2, 3]))]);
     const shares = await Promise.all(perPartyShares.slice(0, 2).map((share) => engine.partialDecrypt(share, aggregated)));
-    await expect(engine.combineDecryptionShares(shares, aggregated, 3)).rejects.toThrow(/below threshold/i);
+    await expect(engine.combineDecryptionShares(shares, aggregated)).rejects.toThrow(/below threshold/i);
   });
 });

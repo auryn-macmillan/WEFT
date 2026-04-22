@@ -1,0 +1,6 @@
+- generic [active] [ref=e1]:
+  - heading "fhe.rs WASM spike" [level=1] [ref=e2]
+  - paragraph [ref=e3]:
+    - text: "Expected success marker:"
+    - strong [ref=e4]: decrypt-ok
+  - generic [ref=e5]: "worker-error: WebAssembly.Table.grow(): failed to grow table by 4"
