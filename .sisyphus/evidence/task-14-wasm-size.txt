@@ -1,0 +1,9 @@
+Command: gzip -9 -c /tmp/pkg/fhe_wasm_bg.wasm | wc -c
+Gzip bytes: 173835
+Budget bytes: 8388608
+Status: PASS
+
+Related build commands:
+- cargo check --target wasm32-unknown-unknown -p fhe-wasm  => PASS
+- wasm-pack build --release --target web examples/weft-web/crates/fhe-wasm --out-dir /tmp/pkg => PASS
+- wasm-pack build --release --target web examples/weft-web/crates/fhe-wasm --out-dir ../../packages/fhe-wasm/pkg => PASS

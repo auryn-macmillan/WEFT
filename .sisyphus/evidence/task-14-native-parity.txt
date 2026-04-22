@@ -1,0 +1,19 @@
+Command: cargo test -p fhe-wasm
+Status: PASS
+
+Finished `test` profile [unoptimized + debuginfo] target(s) in 10.26s
+
+running 2 tests
+test bfv::tests::deterministic_fixture_blobs_match_selected_cases ... ok
+test bfv::tests::public_api_roundtrip_matches_selected_fixtures ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.18s
+
+Verified fixtures:
+- single-encrypt-decrypt
+- sum-n2
+- sum-n3
+
+Notes:
+- deterministic fixture blob parity matched checked-in .bin artifacts
+- public wasm-bindgen surface passed native encrypt/add/decrypt round-trip against selected T7 fixtures

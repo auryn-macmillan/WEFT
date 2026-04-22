@@ -11,7 +11,7 @@ name = "fixture-gen"
 path = "src/bin/fixture-gen.rs"
 
 [dependencies]
-e3-fhe-params = { path = "/tmp/enclave/crates/fhe-params" }
+e3-fhe-params = { path = "vendor/e3-fhe-params" }
 fhe = { path = "vendor/fhe-rs/crates/fhe" }
 fhe-traits = { path = "vendor/fhe-rs/crates/fhe-traits" }
 getrandom = { version = "0.2", features = ["js"] }

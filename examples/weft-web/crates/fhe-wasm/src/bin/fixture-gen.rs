@@ -5,7 +5,7 @@ use std::fs;
 use std::path::Path;
 use std::sync::Arc;
 
-use e3_fhe_params::{BfvParamSet, BfvPreset};
+use e3_fhe_params::{build_bfv_params_from_set_arc, BfvParamSet, BfvPreset};
 use fhe::bfv::{BfvParameters, Ciphertext, Encoding, Plaintext, SecretKey};
 use fhe_traits::{DeserializeParametrized, FheDecoder, FheDecrypter, FheEncoder, Serialize};
 use rand::RngCore;
@@ -91,7 +91,7 @@ impl BfvEnv {
     fn new(rng: &mut ChaCha20Rng) -> Self {
         let param_set: BfvParamSet = BfvPreset::SecureThreshold8192.into();
         let t = param_set.plaintext_modulus;
-        let params = param_set.build_arc();
+        let params = build_bfv_params_from_set_arc(param_set);
         let degree = params.degree();
         let sk = SecretKey::random(&params, rng);
         Self {

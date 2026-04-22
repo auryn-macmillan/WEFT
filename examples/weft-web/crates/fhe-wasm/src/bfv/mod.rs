@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 
-use std::path::PathBuf;
 use std::sync::Arc;
 
 use e3_fhe_params::{build_bfv_params_from_set_arc, BfvParamSet, BfvPreset};
 use fhe::bfv::{BfvParameters, Ciphertext, Encoding, Plaintext, PublicKey, SecretKey};
 use fhe_traits::{
-    Deserialize, DeserializeParametrized, FheDecoder, FheDecrypter, FheEncoder, FheEncrypter,
-    Serialize,
+    DeserializeParametrized, FheDecoder, FheDecrypter, FheEncoder, FheEncrypter, Serialize,
 };
 use rand::thread_rng;
 use wasm_bindgen::prelude::*;
@@ -22,6 +20,7 @@ pub struct ParamsHandle {
 #[wasm_bindgen]
 pub struct SecretKeyHandle {
     inner: SecretKey,
+    params: Arc<BfvParameters>,
 }
 
 #[wasm_bindgen]
@@ -39,12 +38,13 @@ pub fn generate_secret_key(params: &ParamsHandle) -> SecretKeyHandle {
     let mut rng = thread_rng();
     SecretKeyHandle {
         inner: SecretKey::random(&params.inner, &mut rng),
+        params: params.inner.clone(),
     }
 }
 
 #[wasm_bindgen]
 pub fn derive_public_key(params: &ParamsHandle, sk: &SecretKeyHandle) -> Vec<u8> {
-    assert_same_params(params, &sk.inner.par, "derive_public_key");
+    assert_same_params(params, &sk.params, "derive_public_key");
     let mut rng = thread_rng();
     PublicKey::new(&sk.inner, &mut rng).to_bytes()
 }
@@ -73,7 +73,7 @@ pub fn homomorphic_add(params: &ParamsHandle, a: &[u8], b: &[u8]) -> Vec<u8> {
 
 #[wasm_bindgen]
 pub fn decrypt(params: &ParamsHandle, sk: &SecretKeyHandle, ct: &[u8]) -> Vec<i32> {
-    assert_same_params(params, &sk.inner.par, "decrypt");
+    assert_same_params(params, &sk.params, "decrypt");
     let ct = Ciphertext::from_bytes(ct, &params.inner)
         .unwrap_or_else(|error| panic!("decrypt ciphertext decode failed: {error}"));
     let pt = sk
@@ -132,6 +132,8 @@ fn decode_signed(value: u64, plaintext_modulus: u64) -> i32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::PathBuf;
+
     use rand::{RngCore, SeedableRng};
     use rand_chacha::ChaCha20Rng;
     use serde::Deserialize;
