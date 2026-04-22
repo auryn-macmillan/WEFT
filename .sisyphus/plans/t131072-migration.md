@@ -172,7 +172,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
 
 ## TODOs
 
-- [ ] 1. Update /tmp/enclave to latest main
+- [x] 1. Update /tmp/enclave to latest main
 
   **What to do**:
   - Run `cd /tmp/enclave && git pull origin main` to get PR #1520 changes
@@ -218,7 +218,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
 
   **Commit**: NO (infrastructure step)
 
-- [ ] 2. Update Rust constants.rs — remove bitplane, add standard encoding helpers
+- [x] 2. Update Rust constants.rs — remove bitplane, add standard encoding helpers
 
   **What to do**:
   - Remove `BITS_PER_GRADIENT` constant and its calculation
@@ -295,7 +295,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   - Message: `refactor(weft): replace bitplane encoding with standard coefficient encoding`
   - Files: `secure-process/src/constants.rs`
 
-- [ ] 3. Update TypeScript constants.ts — remove bitplane constants, update overflow invariant
+- [x] 3. Update TypeScript constants.ts — remove bitplane constants, update overflow invariant
 
   **What to do**:
   - Change `PLAINTEXT_MODULUS` from `100n` to `131072n`
@@ -353,7 +353,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   **Commit**: YES (groups with Task 2, 4)
   - Files: `client/src/constants.ts`
 
-- [ ] 4. Update Solidity FLAggregator.sol — PLAINTEXT_MOD=131072, standard overflow check — new PLAINTEXT_MOD and standard overflow invariant
+- [x] 4. Update Solidity FLAggregator.sol — PLAINTEXT_MOD=131072, standard overflow check — new PLAINTEXT_MOD and standard overflow invariant
 
   **What to do**:
   - Change `PLAINTEXT_MOD` from `100` to `131072`
@@ -409,7 +409,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   **Commit**: YES (groups with Tasks 2, 3)
   - Files: `contracts/FLAggregator.sol`
 
-- [ ] 5. Rewrite Rust integration tests for standard encoding
+- [x] 5. Rewrite Rust integration tests for standard encoding
 
   **What to do**:
   - Update `const PLAINTEXT_MODULUS: u64 = 100` to read from the BFV preset or use `131072`
@@ -468,7 +468,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   - Message: `test(weft): rewrite Rust integration tests for standard coefficient encoding`
   - Files: `secure-process/tests/integration.rs`
 
-- [ ] 6. Rewrite TypeScript encrypt.ts — standard quantize/dequantize
+- [x] 6. Rewrite TypeScript encrypt.ts — standard quantize/dequantize
 
   **What to do**:
   - Remove `encodeBitplane()` function entirely
@@ -536,7 +536,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   **Commit**: YES
   - Files: `client/src/encrypt.ts`
 
-- [ ] 7. Rewrite TypeScript encrypt.test.ts for standard encoding
+- [x] 7. Rewrite TypeScript encrypt.test.ts for standard encoding
 
   **What to do**:
   - Remove all `encodeBitplane`/`decodeBitplane` test cases
@@ -603,7 +603,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   **Commit**: YES
   - Files: `client/tests/encrypt.test.ts`
 
-- [ ] 8. Update coordinator round.ts — standard two's-complement decode
+- [x] 8. Update coordinator round.ts — standard two's-complement decode
 
   **What to do**:
   - Update `dequantizeChunks()` (or equivalent decode function) to use standard two's-complement:
@@ -650,7 +650,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   **Commit**: YES
   - Files: `coordinator/src/round.ts`
 
-- [ ] 9. Update Solidity test FLAggregator.t.sol for new invariant
+- [x] 9. Update Solidity test FLAggregator.t.sol for new invariant
 
   **What to do**:
   - Update test params to reflect new PLAINTEXT_MOD=131072
@@ -702,7 +702,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   **Commit**: YES
   - Files: `contracts/test/FLAggregator.t.sol`
 
-- [ ] 10. Rewrite threshold_demo.rs for standard encoding
+- [x] 10. Rewrite threshold_demo.rs for standard encoding
 
   **What to do**:
   - Change `const PLAINTEXT_MODULUS: u64 = 100` to `131072`
@@ -755,7 +755,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   **Commit**: YES
   - Files: `secure-process/examples/threshold_demo.rs`
 
-- [ ] 11. Rewrite run-round.ts demo for standard encoding
+- [x] 11. Rewrite run-round.ts demo for standard encoding
 
   **What to do**:
   - Remove imports of `BITS_PER_GRADIENT`, `GRADIENTS_PER_CT`, `encodeBitplane`, `decodeBitplane`
@@ -808,7 +808,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   **Commit**: YES
   - Files: `scripts/run-round.ts`
 
-- [ ] 12. Update README.md for standard encoding
+- [x] 12. Update README.md for standard encoding
 
   **What to do**:
   - Update the plaintext modulus statement from `t = 100` to `t = 131,072`
@@ -857,7 +857,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   **Commit**: YES
   - Files: `README.md`
 
-- [ ] 13. Delete bitplane-prototype.ts + final bitplane residue grep
+- [x] 13. Delete bitplane-prototype.ts + final bitplane residue grep
 
   **What to do**:
   - Delete `scripts/bitplane-prototype.ts`
@@ -918,7 +918,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
 
 > 4 review agents run in PARALLEL. ALL must APPROVE. Present consolidated results to user and get explicit "okay" before completing.
 
-- [ ] F1. **Plan Compliance Audit** — `oracle`
+- [x] F1. **Plan Compliance Audit** — `oracle`
   Read the plan end-to-end. For each "Must Have": verify implementation exists. For each "Must NOT Have": search codebase for forbidden patterns. Check evidence files exist in .sisyphus/evidence/. Compare deliverables against plan.
   Output: `Must Have [N/N] | Must NOT Have [N/N] | Tasks [N/N] | VERDICT: APPROVE/REJECT`
 

@@ -705,7 +705,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/lib/crypto/engine.ts`, `examples/weft-web/src/lib/crypto/index.ts`, `examples/weft-web/src/lib/crypto/__tests__/overflow.test.ts`
   - Pre-commit: `pnpm --filter weft-web check && pnpm --filter weft-web test:unit src/lib/crypto`
 
-- [ ] 7. **Native Rust fixture generator for parity tests**
+- [x] 7. **Native Rust fixture generator for parity tests**
 
   **What to do**:
   - Create `examples/weft-web/crates/fhe-wasm/fixtures/` containing a binary `fixture-gen` (separate `[[bin]]` target) that:
@@ -784,7 +784,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/crates/fhe-wasm/src/bin/fixture-gen.rs`, `examples/weft-web/crates/fhe-wasm/fixtures/**`, `examples/weft-web/crates/fhe-wasm/fixtures/README.md`, `scripts/check-fixtures-up-to-date.sh`
   - Pre-commit: `cargo run --release -p fhe-wasm --bin fixture-gen && scripts/check-fixtures-up-to-date.sh`
 
-- [ ] 8. **MockCryptoEngine implementation**
+- [x] 8. **MockCryptoEngine implementation**
 
   **What to do**:
   - Implement `examples/weft-web/src/lib/crypto/mock.ts` conforming to `CryptoEngine`:
@@ -851,7 +851,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/lib/crypto/mock.ts`, `examples/weft-web/src/lib/crypto/__tests__/mock.test.ts`
   - Pre-commit: `pnpm --filter weft-web test:unit src/lib/crypto/__tests__/mock.test.ts`
 
-- [ ] 9. **Worker topology + message bus**
+- [x] 9. **Worker topology + message bus**
 
   **What to do**:
   - Design worker mesh:
@@ -929,7 +929,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/lib/workers/**`, `examples/weft-web/src/routes/_dev/workers/+page.svelte`
   - Pre-commit: `pnpm --filter weft-web check && pnpm --filter weft-web test:unit src/lib/workers`
 
-- [ ] 10. **AttackerPanel.svelte + ciphertext tile component**
+- [x] 10. **AttackerPanel.svelte + ciphertext tile component**
 
   **What to do**:
   - Component: `examples/weft-web/src/lib/components/AttackerPanel.svelte`
@@ -1000,7 +1000,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/lib/components/AttackerPanel.svelte`, `examples/weft-web/src/lib/components/CiphertextTile.svelte`, `examples/weft-web/src/lib/components/__tests__/**`, `examples/weft-web/src/routes/_dev/**`
   - Pre-commit: `pnpm --filter weft-web test:unit src/lib/components`
 
-- [ ] 11. **ParametersModal.svelte + overflow invariant display**
+- [x] 11. **ParametersModal.svelte + overflow invariant display**
 
   **What to do**:
   - Modal component `examples/weft-web/src/lib/components/ParametersModal.svelte`:
@@ -1066,7 +1066,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/lib/components/ParametersModal.svelte`, `examples/weft-web/src/lib/components/__tests__/parameters-modal.test.ts`
   - Pre-commit: `pnpm --filter weft-web check && pnpm --filter weft-web test:unit`
 
-- [ ] 12. **ProgressiveDisclosure.svelte primitive (3-level toggle)**
+- [x] 12. **ProgressiveDisclosure.svelte primitive (3-level toggle)**
 
   **What to do**:
   - Primitive component `examples/weft-web/src/lib/components/ProgressiveDisclosure.svelte` with slots:
@@ -1128,7 +1128,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/lib/components/ProgressiveDisclosure.svelte`, test file, dev route
   - Pre-commit: `pnpm --filter weft-web test:unit`
 
-- [ ] 13. **PhaseShell.svelte layout + phase progress bar**
+- [x] 13. **PhaseShell.svelte layout + phase progress bar**
 
   **What to do**:
   - `examples/weft-web/src/lib/components/PhaseShell.svelte`:
@@ -1189,7 +1189,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/lib/components/PhaseShell.svelte`, `examples/weft-web/src/lib/components/PhaseProgress.svelte`, `examples/weft-web/src/lib/stores/phase.ts`, tests
   - Pre-commit: `pnpm --filter weft-web test:unit`
 
-- [ ] 14. **fhe.rs WASM port — strip rayon, target wasm32, wasm-bindgen core BFV**
+- [x] 14. **fhe.rs WASM port — strip rayon, target wasm32, wasm-bindgen core BFV**
 
   **What to do**:
   - Populate `examples/weft-web/crates/fhe-wasm/` (stub from T3):
@@ -1270,7 +1270,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/crates/fhe-wasm/Cargo.toml`, `examples/weft-web/crates/fhe-wasm/src/**`, `examples/weft-web/crates/fhe-wasm/vendor/**`, `examples/weft-web/packages/fhe-wasm/**`
   - Pre-commit: `cargo test -p fhe-wasm --release && wasm-pack build --release examples/weft-web/crates/fhe-wasm`
 
-- [ ] 15. **trbfv WASM port — DKG + decryption_share + share combine bindings**
+- [x] 15. **trbfv WASM port — DKG + decryption_share + share combine bindings**
 
   **What to do**:
   - Extend `examples/weft-web/crates/fhe-wasm/src/threshold.rs`:
@@ -1331,7 +1331,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/crates/fhe-wasm/src/threshold/**`, `examples/weft-web/crates/fhe-wasm/src/common.rs`
   - Pre-commit: `cargo test -p fhe-wasm --release && wasm-pack test --headless --chrome examples/weft-web/crates/fhe-wasm`
 
-- [ ] 16. **Illustrated asset implementation (hospitals, committee, locks)**
+- [x] 16. **Illustrated asset implementation (hospitals, committee, locks)**
 
   **What to do**:
   - Produce all SVG assets listed in T4's INVENTORY.md under `examples/weft-web/src/lib/assets/svg/`:
@@ -1394,7 +1394,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/lib/assets/svg/**`, `examples/weft-web/src/lib/assets/index.ts`, `examples/weft-web/src/routes/_dev/assets/+page.svelte`
   - Pre-commit: `pnpm --filter weft-web check`
 
-- [ ] 17. **MeetParticipants + DistributedKeygen phase components**
+- [x] 17. **MeetParticipants + DistributedKeygen phase components**
 
   **What to do**:
   - Route `examples/weft-web/src/routes/walkthrough/1-meet/+page.svelte`:
@@ -1462,7 +1462,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/routes/walkthrough/1-meet/**`, `examples/weft-web/src/routes/walkthrough/2-dkg/**`
   - Pre-commit: `pnpm --filter weft-web test:unit && pnpm --filter weft-web check`
 
-- [ ] 18. **ShareDistribution + AggregatePublicKey phase components**
+- [x] 18. **ShareDistribution + AggregatePublicKey phase components**
 
   **What to do**:
   - Route `3-shares/+page.svelte`: animates secret shares being distributed across committee workers. Visualizes that each committee has ONLY its own share; no single party has the full secret. "Learn more" explains Shamir recovery threshold.
@@ -1517,7 +1517,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/routes/walkthrough/3-shares/**`, `examples/weft-web/src/routes/walkthrough/4-aggregate-pk/**`
   - Pre-commit: `pnpm --filter weft-web check`
 
-- [ ] 19. **LocalTrainingEncryption + Encoding animation phase component**
+- [x] 19. **LocalTrainingEncryption + Encoding animation phase component**
 
   **What to do**:
   - Route `5-train-encrypt/+page.svelte`:
@@ -1578,7 +1578,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/routes/walkthrough/5-train-encrypt/**`
   - Pre-commit: `pnpm --filter weft-web check`
 
-- [ ] 20. **HomomorphicAggregation + ThresholdDecryption phase components**
+- [x] 20. **HomomorphicAggregation + ThresholdDecryption phase components**
 
   **What to do**:
   - Route `6-aggregate/+page.svelte`: ciphertexts flow into aggregator worker; visualizes homomorphic addition (gears turning; encrypted ciphertext tiles merging). Key insight box: "We added encrypted numbers without ever seeing them." Uses `CryptoEngine.aggregateCiphertexts()`.
@@ -1639,7 +1639,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/routes/walkthrough/6-aggregate/**`, `examples/weft-web/src/routes/walkthrough/7-decrypt/**`
   - Pre-commit: `pnpm --filter weft-web check`
 
-- [ ] 21. **GlobalModelUpdate + round-complete summary phase component**
+- [x] 21. **GlobalModelUpdate + round-complete summary phase component**
 
   **What to do**:
   - Route `8-update/+page.svelte`:
@@ -1700,7 +1700,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/routes/walkthrough/8-update/**`, `examples/weft-web/src/lib/components/RoundSummary.svelte`
   - Pre-commit: `pnpm --filter weft-web check`
 
-- [ ] 22. **Sandbox mode with parameter controls**
+- [x] 22. **Sandbox mode with parameter controls**
 
   **What to do**:
   - Create `/sandbox` route with interactive controls (non-guided, free play)
@@ -1785,7 +1785,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/routes/sandbox/**`, `examples/weft-web/src/lib/components/SandboxControls.svelte`, `examples/weft-web/src/lib/components/RunHistory.svelte`
   - Pre-commit: `pnpm --filter weft-web check && pnpm --filter weft-web test:unit src/routes/sandbox`
 
-- [ ] 23. **Parity test harness: WASM vs native Rust**
+- [x] 23. **Parity test harness: WASM vs native Rust**
 
   **What to do**:
   - Create `examples/weft-web/tests/parity/` with Playwright-driven test runner
@@ -1861,7 +1861,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/tests/parity/**`, `examples/weft-web/playwright.parity.config.ts`, `examples/weft-web/package.json` (add `test:parity` script)
   - Pre-commit: `pnpm --filter weft-web test:parity`
 
-- [ ] 24. **WasmCryptoEngine wiring + worker integration**
+- [x] 24. **WasmCryptoEngine wiring + worker integration**
 
   **What to do**:
   - Implement `WasmCryptoEngine` class in `examples/weft-web/src/lib/crypto/wasm.ts` satisfying `CryptoEngine` interface (T6 — interface defined in `engine.ts`)
@@ -1940,7 +1940,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/src/lib/crypto/wasm.ts`, `examples/weft-web/src/lib/crypto/index.ts`, `examples/weft-web/src/lib/workers/committee-member.ts`, `examples/weft-web/.env.example`
   - Pre-commit: `pnpm --filter weft-web check && pnpm --filter weft-web test:unit src/lib/crypto`
 
-- [ ] 25. **Playwright E2E test suite (Chrome + Firefox)**
+- [x] 25. **Playwright E2E test suite (Chrome + Firefox)**
 
   **What to do**:
   - Create `examples/weft-web/tests/e2e/` with Playwright config targeting Chrome + Firefox
@@ -2018,7 +2018,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/tests/e2e/**`, `examples/weft-web/playwright.config.ts`, `examples/weft-web/package.json` (add `test:e2e` script)
   - Pre-commit: `pnpm --filter weft-web test:e2e`
 
-- [ ] 26. **Performance profiling + bundle-size enforcement**
+- [x] 26. **Performance profiling + bundle-size enforcement**
 
   **What to do**:
   - Add `vite-bundle-visualizer` (or `rollup-plugin-visualizer`) to generate bundle reports
@@ -2104,7 +2104,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/scripts/check-bundle-size.ts`, `examples/weft-web/tests/perf/**`, `examples/weft-web/package.json` (add `check:bundle`, `test:perf` scripts)
   - Pre-commit: `pnpm --filter weft-web check:bundle && pnpm --filter weft-web test:perf`
 
-- [ ] 27. **GitHub Actions deploy workflow**
+- [x] 27. **GitHub Actions deploy workflow**
 
   **What to do**:
   - Create `.github/workflows/deploy-weft-web.yml`
@@ -2181,7 +2181,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `.github/workflows/deploy-weft-web.yml`, `examples/weft-web/svelte.config.js` (BASE_PATH wiring), `examples/weft-web/static/404.html`
   - Pre-commit: `actionlint .github/workflows/deploy-weft-web.yml`
 
-- [ ] 28. **README + architecture docs + honest framing**
+- [x] 28. **README + architecture docs + honest framing**
 
   **What to do**:
   - Create `examples/weft-web/README.md` with: project intent, quickstart, dev commands, browser support matrix, architecture overview
@@ -2260,7 +2260,7 @@ Max Concurrent: 9 (Wave 2)
   - Files: `examples/weft-web/README.md`, `examples/weft-web/docs/architecture.md`, `examples/weft-web/docs/honest-framing.md`, `examples/weft-web/src/routes/+page.svelte` (landing link)
   - Pre-commit: `markdownlint examples/weft-web/docs examples/weft-web/README.md`
 
-- [ ] 29. **Accessibility WCAG 2.2 AA pass**
+- [x] 29. **Accessibility WCAG 2.2 AA pass**
 
   **What to do**:
   - Integrate `@axe-core/playwright` into E2E suite (T25) — scan every walkthrough phase and sandbox
@@ -2360,7 +2360,7 @@ Max Concurrent: 9 (Wave 2)
 >
 > **Do NOT auto-proceed after verification. Wait for user's explicit approval before marking work complete.**
 
-- [ ] F1. **Plan Compliance Audit** — `oracle`
+- [x] F1. **Plan Compliance Audit** — `oracle`
 
   Read this plan end-to-end. For each "Must Have": verify implementation exists (inspect file, run build command, execute script). For each "Must NOT Have" guardrail: search codebase for forbidden patterns — reject with file:line if found. Check evidence files exist in `.sisyphus/evidence/`. Compare deliverables list against plan.
 
@@ -2373,13 +2373,13 @@ Max Concurrent: 9 (Wave 2)
 
   Output: `Must Have [N/N] | Must NOT Have [N/N] | Tasks [N/N] | VERDICT: APPROVE/REJECT`
 
-- [ ] F2. **Code Quality Review** — `unspecified-high`
+- [x] F2. **Code Quality Review** — `unspecified-high`
 
   Run `pnpm --filter weft-web lint`, `pnpm --filter weft-web check` (svelte-check), `cargo check --target wasm32-unknown-unknown -p fhe-wasm`, `cargo clippy -p fhe-wasm`, `vitest run`, `wasm-pack test --headless --chrome`. Review all changed files for: `as any`/`@ts-ignore`, empty catches, `console.log` in production, commented-out code, unused imports, AI slop (excessive comments, over-abstraction, generic names like `data`/`result`/`item`/`temp`).
 
   Output: `Build [PASS/FAIL] | Lint [PASS/FAIL] | Unit tests [N pass/N fail] | WASM tests [N pass/N fail] | Files [N clean/N issues] | VERDICT`
 
-- [ ] F3. **Real Manual QA** — `unspecified-high` (+ `playwright` skill)
+- [x] F3. **Real Manual QA** — `unspecified-high` (+ `playwright` skill)
 
   Start from clean state. Execute EVERY QA scenario from EVERY task — follow exact steps, capture evidence. Cross-browser: Chrome + Firefox + Safari desktop. Test cross-task integration (phases chained, sandbox after walkthrough, re-runs). Test edge cases: 2-client round, 10-client round, zero-magnitude gradient, negative gradient, rapid phase navigation, page refresh mid-walkthrough. Save to `.sisyphus/evidence/final-qa/`.
 
@@ -2390,7 +2390,7 @@ Max Concurrent: 9 (Wave 2)
 
   Output: `Scenarios [N/N pass] | Integration [N/N] | Edge Cases [N tested] | Browsers [3/3] | Perf [PASS/FAIL] | VERDICT`
 
-- [ ] F4. **Scope Fidelity Check** — `deep`
+- [x] F4. **Scope Fidelity Check** — `deep`
 
   For each task: read "What to do", read actual diff (`git log`/`git diff`). Verify 1:1 — everything in spec was built (no missing), nothing beyond spec was built (no creep). Check "Must NOT do" compliance. Detect cross-task contamination (Task N touching Task M's files without declared dependency). Flag unaccounted changes to existing `secure-process/`, `client/`, `coordinator/`, `contracts/` directories (those are out of scope for this plan — only NEW files under `examples/weft-web/` should be added).
 

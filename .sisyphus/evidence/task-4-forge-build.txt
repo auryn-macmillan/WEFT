@@ -1,0 +1,11 @@
+=== FLAggregator.sol PLAINTEXT_MOD ===
+    uint32 numClients;
+  uint256 public constant PLAINTEXT_MOD = 131072;
+    (uint32 numClients, uint32 numChunks, uint32 scaleFactor, uint32 maxGradInt, address coordinator) = abi.decode(
+    if (numClients < 2) revert InvalidNumClients();
+    if (uint256(numClients) * uint256(maxGradInt) >= PLAINTEXT_MOD / 2) {
+      numClients: numClients,
+    if (inputCounts[e3Id] >= rounds[e3Id].numClients) {
+
+=== No bitplane references ===
+0 bitplane references

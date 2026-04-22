@@ -1,0 +1,99 @@
+{
+  "generatedAt": "2026-04-22T03:50:57.392Z",
+  "fixtureDir": "/home/dev/repo/examples/weft-web/crates/fhe-wasm/fixtures/cases",
+  "results": [
+    {
+      "fixtureId": "case-01-single-zero",
+      "passed": true
+    },
+    {
+      "fixtureId": "case-02-single-max-positive",
+      "passed": true
+    },
+    {
+      "fixtureId": "case-03-single-max-negative",
+      "passed": true
+    },
+    {
+      "fixtureId": "case-04-two-clients-cancel",
+      "passed": true
+    },
+    {
+      "fixtureId": "case-05-large-coeffs",
+      "passed": true
+    },
+    {
+      "fixtureId": "case-06-alternating-signs",
+      "passed": true
+    },
+    {
+      "fixtureId": "case-07-near-overflow-boundary",
+      "passed": true
+    },
+    {
+      "fixtureId": "case-08-single-chunk-16",
+      "passed": true
+    },
+    {
+      "fixtureId": "case-09-multi-client-16",
+      "passed": true
+    },
+    {
+      "fixtureId": "case-10-repeated-values",
+      "passed": true
+    },
+    {
+      "fixtureId": "case-11-ascending",
+      "passed": true
+    },
+    {
+      "fixtureId": "case-12-five-clients-mixed",
+      "passed": true
+    },
+    {
+      "fixtureId": "chunk-boundary-8192",
+      "passed": true
+    },
+    {
+      "fixtureId": "chunk-boundary-8193",
+      "passed": true
+    },
+    {
+      "fixtureId": "single-encrypt-decrypt",
+      "passed": true
+    },
+    {
+      "fixtureId": "sum-n10",
+      "passed": true
+    },
+    {
+      "fixtureId": "sum-n2",
+      "passed": true
+    },
+    {
+      "fixtureId": "sum-n3",
+      "passed": true
+    },
+    {
+      "fixtureId": "sum-n5",
+      "passed": true
+    },
+    {
+      "fixtureId": "threshold-3-of-5-negative",
+      "passed": true
+    },
+    {
+      "fixtureId": "threshold-3-of-5-zero",
+      "passed": true
+    },
+    {
+      "fixtureId": "threshold-3-of-5",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "total": 22,
+    "passed": 22,
+    "failed": 0
+  }
+}

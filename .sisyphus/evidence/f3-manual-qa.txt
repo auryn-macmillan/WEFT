@@ -1,0 +1,99 @@
+===== F3 MANUAL QA EVIDENCE =====
+Date: 2026-04-22
+
+=== Step A: Rust Tests ===
+cargo test --manifest-path /home/dev/repo/secure-process/Cargo.toml
+
+RESULT: ALL PASS
+  14 unit tests (constants module): ok
+  5 integration tests: ok
+  Total: 19 passed, 0 failed
+
+Tests covered:
+  constants::tests::encode_decode_round_trips ... ok
+  constants::tests::max_grad_int_is_correct ... ok
+  constants::tests::encode_negative_coefficient ... ok
+  constants::tests::encode_positive_coefficient ... ok
+  constants::tests::overflow_invariant_holds_for_demo_params ... ok
+  constants::tests::decode_negative_coefficient ... ok
+  constants::tests::decode_positive_coefficient ... ok
+  constants::tests::overflow_invariant_passes_at_boundary ... ok
+  constants::tests::overflow_invariant_rejects_when_too_many_clients - should panic ... ok
+  constants::tests::quantize_negative ... ok
+  constants::tests::quantize_positive ... ok
+  constants::tests::quantize_zero ... ok
+  constants::tests::three_client_sum_decodes_correctly ... ok
+  constants::tests::quantize_clamps ... ok
+  tests::output_uses_length_prefixed_chunk_encoding ... ok
+  tests::sums_single_chunk_from_three_clients ... ok
+  tests::preserves_negative_values_via_twos_complement ... ok
+  tests::sums_zero_gradients_without_modifying_other_slots ... ok
+  tests::sums_two_chunks_across_three_clients ... ok
+
+=== Step B: TypeScript Tests ===
+npx vitest run --dir client/tests
+
+RESULT: ALL PASS
+  16 tests in client/tests/encrypt.test.ts: ok
+  Total: 1 test file, 16 tests passed
+
+=== Step C: Demo 1 — run-round.ts ===
+npx tsx /home/dev/repo/scripts/run-round.ts
+
+RESULT: EXIT 0, PASS
+  - Output contains "131072": YES ("t=131072" in technical line)
+  - Output contains "bitplane": NO
+  - Round completed successfully: YES (6/6 phases, model updated)
+  - Key line: "Technical: BFV lattice encryption · t=131072 · S=4096 · 512 params · 1 chunk(s)"
+  - Encoding described: "Standard coefficient — each gradient maps to one BFV coefficient via two's complement mod t"
+  - Overflow verified: "3 × 4096 = 12288 ✓"
+
+=== Step C: Demo 2 — threshold_demo (Rust) ===
+cargo run --example threshold_demo --manifest-path /home/dev/repo/secure-process/Cargo.toml
+
+RESULT: EXIT 0, PASS
+  - Output contains "bitplane": NO
+  - Output contains "131072": YES ("t=131072" in technical line)
+  - Real BFV crypto with 5-of-committee, 3-of-5 threshold decryption: YES
+  - 8/8 phases completed: YES
+  - Key line: "Technical: degree=8192 · t=131072 · S=4096 · 512 params · λ=40 · 5 committee members"
+  - Encoding: "Standard coefficient encoding: one coefficient per gradient, S=4096"
+  - Float error: 0.000110 (bound: 0.000244): WITHIN BOUNDS
+
+=== Step D: Cleanup Grep Checks ===
+
+grep -rn "bitplane|BITS_PER_GRADIENT|GRADIENTS_PER_CT" (*.ts, *.rs, *.sol) excluding node_modules:
+RESULT: EMPTY (no matches) ✓
+
+grep -rn "PLAINTEXT_MODULUS.*=.*100[^0-9]" (*.ts, *.rs, *.sol) excluding node_modules:
+RESULT: EMPTY (no matches) ✓
+
+=== Step E: Constants Values ===
+
+client/src/constants.ts:
+  export const PLAINTEXT_MODULUS = 131072n;  ✓ (expected: 131072n)
+
+contracts/FLAggregator.sol:
+  uint256 public constant PLAINTEXT_MOD = 131072;  ✓ (expected: 131072)
+
+secure-process/src/constants.rs:
+  pub const SCALE_FACTOR: u64 = 4096;
+  pub const MAX_CLIENTS: u32 = 10;
+  pub const MAX_GRAD_INT: u64 = (MAX_GRAD_ABS as u64) * SCALE_FACTOR;
+
+Overflow invariant: n_max × MAX_GRAD_INT < t/2 → 10 × 4096 = 40960 < 65536 ✓
+
+=== Step F: bitplane-prototype.ts Deleted ===
+test ! -f /home/dev/repo/scripts/bitplane-prototype.ts
+RESULT: DELETED ✓
+
+=== SUMMARY ===
+Rust tests:     19/19 pass
+TypeScript tests: 16/16 pass
+Demo run-round.ts: PASS (exit 0, t=131072, no bitplane)
+Demo threshold_demo: PASS (exit 0, t=131072, no bitplane)
+Cleanup grepping: CLEAN (no bitplane/old constants)
+Constants correct: PLAINTEXT_MODULUS=131072n (TS), PLAINTEXT_MOD=131072 (Sol)
+File deleted: bitplane-prototype.ts DELETED
+
+Scenarios [19/19 pass] | Demos [2/2] | Edge Cases [6 tested: negative values, zero gradients, multi-chunk, overflow invariant, clamp, round-trip] | VERDICT: APPROVE

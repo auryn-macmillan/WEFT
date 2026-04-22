@@ -1,0 +1,167 @@
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.08s
+     Running `target/debug/examples/threshold_demo`
+
+[36m╔══════════════════════════════════════════════════════════════╗[0m
+[36m║  [1mWEFT — Three Hospitals, Real Encryption, Zero Data Leaks[0m[36m  ║[0m
+[36m╚══════════════════════════════════════════════════════════════╝[0m
+
+[2m  │ Imagine three hospitals want to improve a diabetes risk prediction[0m
+[2m  │ model. Each has thousands of patients — but sharing raw medical data[0m
+[2m  │ would violate privacy regulations and patient trust.[0m
+
+[2m  │ [1mWhat if they could train together without [0m[2mever[0m[2m seeing each[0m
+[2m  │ other's data?[0m[0m
+
+[2m  │ This demo answers that question with REAL cryptography:[0m
+[2m  │   • Real BFV homomorphic encryption (not a simulation)[0m
+[2m  │   • Real threshold key generation (5 parties, need 3 to decrypt)[0m
+[2m  │   • Real homomorphic addition of ciphertexts[0m
+[2m  │   • Real threshold decryption with Shamir secret sharing[0m
+[2m  │   • Standard coefficient encoding: one coefficient per gradient, S=4096[0m
+
+[2m  Technical: degree=8192 · t=131072 · S=4096 · 512 params · λ=40 · 5 committee members[0m
+[2m  Overflow:  n_max × S < t/2 = 65536 (3 clients ✓)[0m
+
+[1m[34m  ┌─── Phase 1/8: Meet the Participants ───────────────────────────┐[0m
+[2m  │ Three hospitals join this training round:[0m
+  │
+  │   [33m[1m🏥 St. Mercy General[0m[2m — 12400 patients[0m
+  │   [35m[1m🏥 Eastside Medical[0m[2m — 8200 patients[0m
+  │   [36m[1m🏥 Pacific University[0m[2m — 22000 patients[0m
+  │
+[2m  │ A committee of [1m5 independent key holders[0m[2m will manage encryption.[0m
+[2m  │ At least [1m3[0m[2m must cooperate to decrypt — no single party can peek.[0m
+  │ [32m✓ All participants registered.[0m
+[34m  └─────────────────────────────────────────────────────────────────┘[0m
+
+[1m[34m  ┌─── Phase 2/8: Distributed Key Generation (DKG) ────────────────┐[0m
+[2m  │ The committee generates a shared encryption key WITHOUT any single[0m
+[2m  │ member knowing the full secret. Each member:[0m
+[2m  │   1. Generates their own secret key piece[0m
+[2m  │   2. Shares it via Shamir secret sharing (split into fragments)[0m
+[2m  │   3. Generates smudging noise (protects against partial leakage)[0m
+  │
+  │   [2mCommittee member 1 — key share + Shamir fragments generated[0m
+  │   [2mCommittee member 2 — key share + Shamir fragments generated[0m
+  │   [2mCommittee member 3 — key share + Shamir fragments generated[0m
+  │   [2mCommittee member 4 — key share + Shamir fragments generated[0m
+  │   [2mCommittee member 5 — key share + Shamir fragments generated[0m
+  │
+  │ [32m✓ DKG complete. 5 key holders, threshold 3-of-5.[0m
+[34m  └─────────────────────────────────────────────────────────────────┘[0m
+
+[1m[34m  ┌─── Phase 3/8: Share Distribution (Simulated Network) ──────────┐[0m
+[2m  │ Committee members exchange their Shamir fragments securely.[0m
+[2m  │ Each member collects one fragment from every other member,[0m
+[2m  │ then aggregates them into their working key.[0m
+  │
+  │ [32m✓ Shamir shares distributed and aggregated across all members.[0m
+[34m  └─────────────────────────────────────────────────────────────────┘[0m
+
+[1m[34m  ┌─── Phase 4/8: Aggregate Public Key ────────────────────────────┐[0m
+[2m  │ All committee members' public key shares combine into ONE shared[0m
+[2m  │ public key. Anyone can encrypt with it, but decryption requires[0m
+[2m  │ [1mcooperation of at least 3 members[0m[2m.[0m
+  │
+  │ [32m✓ Shared public key assembled. Hospitals can now encrypt.[0m
+[34m  └─────────────────────────────────────────────────────────────────┘[0m
+
+[1m[34m  ┌─── Phase 5/8: Local Training & Standard Coefficient Encryption ┐[0m
+[2m  │ Each hospital trains on its private patient data, then encodes[0m
+[2m  │ gradients using standard two's complement coefficient encoding:[0m
+[2m  │   1. Clamp each gradient to [-1, 1][0m
+[2m  │   2. Quantize: grad_int = round(grad × S=4096)[0m
+[2m  │   3. Encode: negative values stored as t - |grad_int| (two's complement mod t)[0m
+[2m  │   4. Encrypt the coefficient vector under the threshold public key[0m
+  │
+  │   [33m[1m🏥 St. Mercy General[0m
+  │   [33mPrivate gradients: [0m [0.295, 0.286, -0.465, -0.192]
+  │   [33mCoefficient (grad₀):[0m grad_int=1210 → encoded=1210 (two's complement mod t)
+  │   [31m[1m🔒 Encrypted (on wire):[0m[2m 0x5766528f6d9c6ef6ce96cfb13181b8d2baf26509a111dc3a...[0m
+  │
+  │   [35m[1m🏥 Eastside Medical[0m
+  │   [33mPrivate gradients: [0m [0.390, 0.165, -0.123, 0.032]
+  │   [33mCoefficient (grad₀):[0m grad_int=1598 → encoded=1598 (two's complement mod t)
+  │   [31m[1m🔒 Encrypted (on wire):[0m[2m 0x02483a8954fc6d20ce8b66d7ab128652369fb97736d6f4e9...[0m
+  │
+  │   [36m[1m🏥 Pacific University[0m
+  │   [33mPrivate gradients: [0m [0.396, 0.324, 0.400, -0.068]
+  │   [33mCoefficient (grad₀):[0m grad_int=1622 → encoded=1622 (two's complement mod t)
+  │   [31m[1m🔒 Encrypted (on wire):[0m[2m 0x7511b76408cbfeab7b8d0faf2dfc9a01ef16fdaa87ca17fc...[0m
+  │
+[2m  │ An eavesdropper intercepts the network traffic and sees... gibberish.[0m
+[2m  │ The ciphertexts are ~100KB each and reveal NOTHING about the[0m
+[2m  │ original gradient values. This is real BFV encryption, not a simulation.[0m
+  │ [32m✓ 3 hospitals × 1 chunks = 3 ciphertexts encrypted.[0m
+[34m  └─────────────────────────────────────────────────────────────────┘[0m
+
+[1m[34m  ┌─── Phase 6/8: Homomorphic Aggregation (Math on Ciphertext) ────┐[0m
+[2m  │ The ciphertexts are ADDED TOGETHER without decrypting them.[0m
+[2m  │ Each BFV coefficient holds one encoded gradient integer. After adding[0m
+[2m  │ 3 clients' ciphertexts, each coefficient holds the gradient sum (mod t).[0m
+  │
+[2m  │ [1mEncrypt(coeff_A) + Encrypt(coeff_B) = Encrypt(coeff_A + coeff_B)[0m[0m
+  │
+  │   [31m[1m🔒 Encrypted aggregate:[0m[2m 0x5b5179d86beb65b511dc811b04463631e30b832f290ad6d52c6182cc925c0956...[0m
+  │
+[2m  │ Nobody can read this — not the coordinator, not any single committee[0m
+[2m  │ member, not an attacker. It contains the SUM of all hospitals'[0m
+[2m  │ encoded gradient coefficients, but extracting individual contributions[0m
+[2m  │ is computationally infeasible.[0m
+  │ [32m✓ Homomorphic sum computed (1 chunks).[0m
+[34m  └─────────────────────────────────────────────────────────────────┘[0m
+
+[1m[34m  ┌─── Phase 7/8: Threshold Decryption (The Reveal) ───────────────┐[0m
+[2m  │ Only [1m3[0m[2m of the 5 committee members need to cooperate to decrypt.[0m
+[2m  │ We pick members 1, 3, and 5 (a non-contiguous subset) to prove[0m
+[2m  │ that ANY valid subset works — not just the first three.[0m
+  │
+  │   [2mCommittee member 1 provides their decryption share...[0m
+  │   [2mCommittee member 3 provides their decryption share...[0m
+  │   [2mCommittee member 5 provides their decryption share...[0m
+  │
+[2m  │ After decryption, the coordinator decodes the standard coefficients:[0m
+[2m  │   1. Each coefficient is the sum of all client gradient integers (mod t)[0m
+[2m  │   2. Two's complement unwrap: if coeff > t/2, value = coeff - t (negative)[0m
+[2m  │   3. Divide by n × S = 3 × 4096 = 12288 to get the average[0m
+  │
+[2m  │ [1mThe aggregate is revealed — but ONLY the aggregate:[0m[0m
+  │
+  │   [31m✗ St. Mercy General's data:[0m[2m  [0.295, 0.286, -0.465, -0.192]  ← still secret[0m
+  │   [31m✗ Eastside Medical's data:[0m[2m  [0.390, 0.165, -0.123, 0.032]  ← still secret[0m
+  │   [31m✗ Pacific University's data:[0m[2m  [0.396, 0.324, 0.400, -0.068]  ← still secret[0m
+  │   [32m[1m✓ Aggregate (public):    [0.361, 0.258, -0.063, -0.076]  ← only this is visible[0m
+  │
+  │ [32m✓ Decryption verified. Shadow match: exact. Float error: 0.000114 (bound: 0.000244)[0m
+[34m  └─────────────────────────────────────────────────────────────────┘[0m
+
+[1m[34m  ┌─── Phase 8/8: Update Global Model ─────────────────────────────┐[0m
+[2m  │ The coordinator applies the decrypted aggregate gradient to the[0m
+[2m  │ shared model. The model improves based on ALL hospitals' data —[0m
+[2m  │ without any hospital's data ever leaving their walls.[0m
+  │
+  │   [33mBefore: [0m [0.613, -0.184, 0.469, 0.488]
+  │   [33mAfter:  [0m [0.609, -0.187, 0.470, 0.489]
+  │
+[2m  │ Learning rate: 0.01 · Model parameters: 512[0m
+  │ [32m✓ Global model updated. Round complete.[0m
+[34m  └─────────────────────────────────────────────────────────────────┘[0m
+
+
+[36m╔═══════════════════════════════════════════╗[0m
+[36m║  [1mRound Complete — Here's What Happened[0m[36m  ║[0m
+[36m╚═══════════════════════════════════════════╝[0m
+
+  [32m✓[0m Three hospitals improved a shared model together
+  [32m✓[0m Gradients were encrypted with REAL BFV homomorphic encryption
+  [32m✓[0m Standard coefficient encoding: S=4096 (±0.000244 precision)
+  [32m✓[0m Ciphertexts were summed — math on encrypted data, no decryption
+  [32m✓[0m Threshold decryption: 3-of-5 committee members cooperated
+  [32m✓[0m Only the aggregate was decrypted — individual data stays private
+  [32m✓[0m Result verified: encrypted path matches plaintext computation exactly
+
+  [1m[36mThis is WEFT:[0m collaborative machine learning where privacy
+  isn't a policy — it's [1mmathematically enforced[0m.
+
+[2m  Powered by The Interfold (Enclave) · BFV homomorphic encryption · Threshold DKG · RISC Zero zkVM[0m
+

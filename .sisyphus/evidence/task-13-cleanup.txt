@@ -1,0 +1,6 @@
+=== bitplane-prototype.ts ===
+DELETED
+=== Bitplane residue grep (should be empty) ===
+CLEAN
+=== No hardcoded t=100 ===
+CLEAN

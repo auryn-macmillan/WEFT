@@ -1,0 +1,118 @@
+F4 Scope Fidelity Check — t131072-migration
+Date: 2026-04-22
+Repo: /home/dev/repo
+
+Plan reviewed:
+- /home/dev/repo/.sisyphus/plans/t131072-migration.md
+
+Method:
+- Read each task's "What to do" / "Must NOT do"
+- Read each target source file
+- Compared against actual merge-base diff from main
+- Verified plan-level guardrails and residue greps
+
+Diff baseline:
+- merge-base with main: 69534d8b1758affb84c14f2413f7adad1ae6fc9f
+- Audited diff for listed migration files shows only one migration delta:
+  secure-process/tests/integration.rs
+  - comment tweak
+  - PLAINTEXT_MODULUS renamed to INSECURE_T
+  - all other audited files were already at the migrated shape before this branch tip
+
+Task-by-task comparison:
+
+Task 2 — secure-process/src/constants.rs
+- Spec: remove bitplane helpers/constants, add standard quantize/dequantize + coefficient encode/decode, keep S=4096/MAX_CLIENTS=10.
+- Actual: matches. No bitplane helpers/constants remain. Standard helpers exist. Invariant implemented as n × MAX_GRAD_INT < t/2, consistent with migration context correction.
+- Must-NOT check: SCALE_FACTOR unchanged; no new deps; lib.rs API untouched.
+- Result: COMPLIANT
+
+Task 5 — secure-process/tests/integration.rs
+- Spec: standard coefficient encoding tests; no bitplane calls; keep harness structure.
+- Actual: matches final spec. File uses encode_coefficient/decode_coefficient with insecure preset t=100 and TEST_SCALE_FACTOR=4, which is explicitly allowed by migration context. Harness structure remains in place.
+- Actual migration diff: rename PLAINTEXT_MODULUS -> INSECURE_T plus comment clarification only.
+- Must-NOT check: fhe_processor untouched; harness not rearchitected.
+- Result: COMPLIANT
+
+Task 10 — secure-process/examples/threshold_demo.rs
+- Spec: standard coefficient encoding narrative and encode/decode flow; keep hospital scenario and FHE flow.
+- Actual: matches. Uses encode_coefficient/decode_coefficient + dequantize_gradient, standard narrative, same scenario/flow retained, no bitplane text.
+- Must-NOT check: no new scenario; encryption/decryption flow retained.
+- Result: COMPLIANT
+
+Task 3 — client/src/constants.ts
+- Spec: PLAINTEXT_MODULUS=131072n, remove BITS_PER_GRADIENT/GRADIENTS_PER_CT, standard overflow invariant, keep DEFAULT_SLOTS_PER_CT.
+- Actual: matches. No bitplane constants remain; PLAINTEXT_MODULUS is 131072n; invariant uses n × MAX_GRAD_INT < t/2.
+- Must-NOT check: SCALE_FACTOR unchanged; DEFAULT_SLOTS_PER_CT kept.
+- Result: COMPLIANT
+
+Task 6 — client/src/encrypt.ts
+- Spec: remove bitplane encode/decode, one coefficient per gradient, two's-complement encode/decode, chunk by DEFAULT_SLOTS_PER_CT, keep function signatures/BFV call pattern.
+- Actual: matches. encodeCoefficient/decodeCoefficient + quantizeGradients/dequantizeGradients are standard coefficient based; splitIntoChunks uses DEFAULT_SLOTS_PER_CT; encryptGradients signature preserved.
+- Must-NOT check: submit/coordinator-facing signatures preserved; BFV encryption call pattern preserved.
+- Result: COMPLIANT
+
+Task 7 — client/tests/encrypt.test.ts
+- Spec: replace bitplane tests with coefficient encode/decode, quantize/dequantize, clamp, overflow tests; keep file structure.
+- Actual: matches. Tests cover positive/negative/zero, aggregation, chunking, invariant pass/fail. No bitplane tests remain.
+- Must-NOT check: no test-harness rearchitecture visible.
+- Result: COMPLIANT
+
+Task 8 — coordinator/src/round.ts
+- Spec: standard two's-complement decode, remove bitplane imports, chunk count by DEFAULT_SLOTS_PER_CT, preserve round lifecycle.
+- Actual: matches. No bitplane imports/references. Decode path defers to weftClient.dequantizeGradients (two's-complement unwrap then divide by n×S). Lifecycle remains request -> activate -> wait -> collect -> decode -> update.
+- Must-NOT check: lifecycle unchanged; model.ts untouched.
+- Result: COMPLIANT
+
+Task 4 — contracts/FLAggregator.sol
+- Spec: PLAINTEXT_MOD=131072; standard overflow check; keep IE3Program ABI and (bytes[], uint256) publishInput wire format; no new storage/events.
+- Actual: matches migration intent. PLAINTEXT_MOD is 131072. validate() enforces corrected invariant numClients × maxGradInt < t/2 (the corrected formula called out in migration context/task 9 notes). publishInput still decodes (bytes[], uint256). No extra event/storage beyond submitted/paramsHash already present in actual code.
+- Must-NOT check: IE3Program interface unchanged; ABI wire format unchanged.
+- Result: COMPLIANT
+
+Task 9 — contracts/test/FLAggregator.t.sol
+- Spec: update tests to new invariant and params; keep helpers/infrastructure.
+- Actual: matches. Overflow test uses new modulus boundary; helpers remain in place; no new test contracts.
+- Must-NOT check: infrastructure/helpers retained.
+- Result: COMPLIANT
+
+Task 11 — scripts/run-round.ts
+- Spec: standard encoding narrative, show t=131072 and one coefficient/gradient, chunk by DEFAULT_SLOTS_PER_CT, keep simulation flow.
+- Actual: matches. Technical display uses t=131072 and standard coefficient encoding; no bitplane references; flow structure preserved.
+- Must-NOT check: no added narrative sections that change simulation flow materially.
+- Result: COMPLIANT
+
+Task 12 — README.md
+- Spec: document t=131,072, standard encoding, updated invariant, remove stale bitplane explanation, update constants table.
+- Actual: matches. README describes standard coefficient encoding, updated invariant, no stale t=100 references, no bitplane residue found.
+- Must-NOT check: README updated in place; no migration-specific scope creep evident from diff.
+- Result: COMPLIANT
+
+Plan-level guardrails:
+- Do NOT change fhe_processor public signature or ciphertext addition logic in lib.rs
+  - Verified in secure-process/src/lib.rs: signature unchanged; logic remains ciphertext grouping + addition only.
+- Do NOT define custom BFV parameters — use the preset
+  - No new custom BFV-parameter definitions introduced by this migration in constants.rs/constants.ts; migration diff does not add custom parameter plumbing.
+- Do NOT divide by n inside the encrypted domain
+  - Verified in lib.rs: no division; averaging happens post-decryption in TS/Rust decoding paths.
+- Do NOT add new features, optimizations, or abstractions during this migration
+  - Audited merge-base diff on the listed migration files shows only the integration.rs constant rename/comment clarification.
+- Do NOT rearchitect test harness — update values in place
+  - Verified in integration.rs, encrypt.test.ts, FLAggregator.t.sol: harnesses remain structurally intact.
+- Do NOT change the (bytes[], uint256) ABI wire format
+  - Verified in contracts/FLAggregator.sol publishInput ABI decode remains (bytes[], uint256).
+
+Residue greps:
+- Command: grep -rn "bitplane\|BITS_PER_GRADIENT\|GRADIENTS_PER_CT" --include="*.ts" --include="*.rs" --include="*.sol" /home/dev/repo --exclude-dir=node_modules 2>&1 | grep -v AGENTS.md
+- Result: EMPTY (0 hits)
+
+- Command: grep -rn "PLAINTEXT_MODULUS.*=.*100[^0-9]" --include="*.ts" --include="*.rs" --include="*.sol" /home/dev/repo --exclude-dir=node_modules 2>&1 | grep -v AGENTS.md
+- Result: EMPTY (0 hits)
+
+Conclusion:
+- The audited files are scope-faithful to the t131072 migration plan.
+- The only migration-specific delta in the audited set is the integration-test constant rename to avoid false-positive residue grep matches.
+- No out-of-scope migration additions were detected in the audited files.
+
+Summary line:
+Tasks [11/11 compliant] | Bitplane Residue [CLEAN/0 hits] | VERDICT: APPROVE
