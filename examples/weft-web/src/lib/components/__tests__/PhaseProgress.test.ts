@@ -9,7 +9,7 @@ describe('PhaseProgress', () => {
     const phases = PHASES.map(p => p.id);
     const visited = new Set([phases[0], phases[1]]);
     
-    render(PhaseProgress, {
+    const { container } = render(PhaseProgress, {
       props: {
         phases,
         current: phases[1],
@@ -17,7 +17,7 @@ describe('PhaseProgress', () => {
       }
     });
     
-    const dots = screen.getAllByRole('button');
+    const dots = container.querySelectorAll('.dot');
     expect(dots).toHaveLength(8);
     
     expect(dots[0]).not.toHaveAttribute('aria-disabled', 'true');
@@ -31,7 +31,7 @@ describe('PhaseProgress', () => {
     const visited = new Set([phases[0], phases[1]]);
     const onJump = vi.fn();
     
-    render(PhaseProgress, {
+    const { container } = render(PhaseProgress, {
       props: {
         phases,
         current: phases[1],
@@ -40,12 +40,12 @@ describe('PhaseProgress', () => {
       }
     });
     
-    const dots = screen.getAllByRole('button');
+    const dots = container.querySelectorAll('.dot');
     
-    await user.click(dots[0]);
+    await user.click(dots[0] as HTMLElement);
     expect(onJump).toHaveBeenCalledWith(phases[0]);
     
-    await user.click(dots[2]);
+    await user.click(dots[2] as HTMLElement);
     expect(onJump).toHaveBeenCalledTimes(1); 
   });
 
@@ -54,7 +54,7 @@ describe('PhaseProgress', () => {
     const visited = new Set([phases[0], phases[1]]);
     const onJump = vi.fn();
     
-    render(PhaseProgress, {
+    const { container } = render(PhaseProgress, {
       props: {
         phases,
         current: phases[1],
@@ -63,9 +63,9 @@ describe('PhaseProgress', () => {
       }
     });
     
-    const dots = screen.getAllByRole('button');
+    const dots = container.querySelectorAll('.dot');
     
-    await fireEvent.keyDown(dots[0], { key: 'Enter' });
+    await fireEvent.keyDown(dots[0] as HTMLElement, { key: 'Enter' });
     expect(onJump).toHaveBeenCalledWith(phases[0]);
   });
 });

@@ -12,10 +12,10 @@ const mockEngine = {
     threshold: 3,
     committeeSize: 5
   }),
-  runDkg: async () => ({} as any),
-  encryptVector: async () => ({} as any),
-  aggregateCiphertexts: async () => ({} as any),
-  partialDecrypt: async () => ({} as any),
+  runDkg: async () => ({} as any), // justification: test stub — return type not exercised
+  encryptVector: async () => ({} as any), // justification: test stub — return type not exercised
+  aggregateCiphertexts: async () => ({} as any), // justification: test stub — return type not exercised
+  partialDecrypt: async () => ({} as any), // justification: test stub — return type not exercised
   combineDecryptionShares: async () => new Int32Array()
 } as unknown as CryptoEngine;
 

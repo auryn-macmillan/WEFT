@@ -17,15 +17,16 @@ mod tests {
     use weft_secure_process::fhe_processor;
 
     const DEGREE: usize = 512;
-    // Insecure preset has t=100. Standard encoding: n × S × G < t/2 = 50.
+    // Insecure test preset (t=100). Standard encoding: n × S × G < t/2 = 50.
     // With 3 clients and G=1.0, use S=4: 3 × 4 × 1.0 = 12 < 50. ✓
-    const PLAINTEXT_MODULUS: u64 = 100;
+    // Named INSECURE_T to distinguish from production INSECURE_T = 131072.
+    const INSECURE_T: u64 = 100;
     const TEST_SCALE_FACTOR: u64 = 4;
 
     fn test_params() -> Arc<BfvParameters> {
         BfvParametersBuilder::new()
             .set_degree(DEGREE)
-            .set_plaintext_modulus(PLAINTEXT_MODULUS)
+            .set_plaintext_modulus(INSECURE_T)
             .set_moduli(&[0xffffee001, 0xffffc4001])
             .build_arc()
             .unwrap()
@@ -72,7 +73,7 @@ mod tests {
     fn encode_gradient_vector(gradients: &[f64]) -> Vec<u64> {
         gradients
             .iter()
-            .map(|&g| encode_coefficient(test_quantize(g), PLAINTEXT_MODULUS))
+            .map(|&g| encode_coefficient(test_quantize(g), INSECURE_T))
             .collect()
     }
 
@@ -108,7 +109,7 @@ mod tests {
     fn decode_gradient_vector(coeffs: &[u64], num_gradients: usize, num_clients: u64) -> Vec<f64> {
         (0..num_gradients)
             .map(|i| {
-                let signed = decode_coefficient(coeffs[i], PLAINTEXT_MODULUS);
+                let signed = decode_coefficient(coeffs[i], INSECURE_T);
                 signed as f64 / (num_clients as f64 * TEST_SCALE_FACTOR as f64)
             })
             .collect()
