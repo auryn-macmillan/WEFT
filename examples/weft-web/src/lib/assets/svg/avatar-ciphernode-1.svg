@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%" role="img" aria-labelledby="avatar-ciphernode-1-title avatar-ciphernode-1-desc">
+  <title id="avatar-ciphernode-1-title">Ciphernode 1</title>
+  <desc id="avatar-ciphernode-1-desc">Committee member avatar for node 1</desc>
+  
+    <circle cx="60" cy="60" r="56" fill="var(--color-neutral-200)" />
+    <circle cx="60" cy="50" r="20" fill="var(--color-neutral-600)" />
+    <path d="M30 100 Q60 60 90 100" fill="var(--color-phase-1)" />
+    <circle cx="60" cy="100" r="16" fill="var(--color-phase-1)" opacity="0.5" />
+    <rect x="50" y="90" width="20" height="12" rx="4" fill="var(--color-neutral-100)" />
+  
+</svg>

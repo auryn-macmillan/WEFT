@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%" role="img" aria-labelledby="gradient-tile-title gradient-tile-desc">
+  <title id="gradient-tile-title">Gradient Tile</title>
+  <desc id="gradient-tile-desc">Plain-text gradient data tile</desc>
+  
+  <rect width="160" height="160" rx="12" fill="var(--color-neutral-200)" />
+  <rect x="20" y="20" width="30" height="30" rx="4" fill="var(--color-primary)" />
+  <rect x="65" y="20" width="30" height="30" rx="4" fill="var(--color-secondary)" />
+  <rect x="110" y="20" width="30" height="30" rx="4" fill="var(--color-info)" />
+  <rect x="20" y="65" width="30" height="30" rx="4" fill="var(--color-warning)" />
+  <rect x="65" y="65" width="30" height="30" rx="4" fill="var(--color-success)" />
+  <rect x="110" y="65" width="30" height="30" rx="4" fill="var(--color-danger)" />
+  <rect x="20" y="110" width="30" height="30" rx="4" fill="var(--color-phase-1)" />
+  <rect x="65" y="110" width="30" height="30" rx="4" fill="var(--color-phase-2)" />
+  <rect x="110" y="110" width="30" height="30" rx="4" fill="var(--color-phase-3)" />
+
+</svg>

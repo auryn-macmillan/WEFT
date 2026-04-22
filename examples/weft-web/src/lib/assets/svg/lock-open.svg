@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="100%" height="100%" role="img" aria-labelledby="lock-open-title lock-open-desc">
+  <title id="lock-open-title">Open Lock</title>
+  <desc id="lock-open-desc">An unlocked padlock</desc>
+  
+  <rect x="20" y="40" width="40" height="30" rx="4" fill="var(--color-warning)" />
+  <path d="M28 40 V28 A12 12 0 0 1 52 28 V20" fill="none" stroke="var(--color-neutral-400)" stroke-width="8" stroke-linecap="round" />
+  <circle cx="40" cy="55" r="4" fill="var(--color-neutral-900)" />
+
+</svg>

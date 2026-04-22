@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="100%" height="100%" role="img" aria-labelledby="hospital-st-mercy-title hospital-st-mercy-desc">
+  <title id="hospital-st-mercy-title">St. Mercy Hospital</title>
+  <desc id="hospital-st-mercy-desc">Red-brick traditional hospital exterior with warm lighting and a classic ambulance port</desc>
+  
+  <rect width="240" height="240" rx="16" fill="var(--color-neutral-100)" />
+  <path d="M40 200 L40 100 L120 60 L200 100 L200 200 Z" fill="var(--color-secondary)" />
+  <rect x="100" y="160" width="40" height="40" fill="var(--color-neutral-800)" />
+  <rect x="60" y="120" width="24" height="24" fill="var(--color-neutral-100)" />
+  <rect x="156" y="120" width="24" height="24" fill="var(--color-neutral-100)" />
+  <path d="M100 160 Q120 140 140 160" fill="none" stroke="var(--color-neutral-800)" stroke-width="4" />
+  <circle cx="120" cy="80" r="12" fill="var(--color-neutral-100)" />
+
+</svg>

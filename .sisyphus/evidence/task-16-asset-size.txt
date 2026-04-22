@@ -1,0 +1,2 @@
+22535	examples/weft-web/src/lib/assets/svg/
+22535	total
