@@ -1,0 +1,142 @@
+/* examples/weft-web/src/lib/tokens.css */
+
+/* ==========================================================================
+   Typography: Self-Hosted Fonts
+   ========================================================================== */
+@font-face {
+  font-family: 'Inter';
+  src: url('/src/lib/assets/fonts/inter-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/src/lib/assets/fonts/inter-bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/src/lib/assets/fonts/jetbrains-mono-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ==========================================================================
+   Design Tokens
+   ========================================================================== */
+:root {
+  /* Colors: Core */
+  --color-primary: #1a9e8f; /* Warm teal */
+  --color-secondary: #e86f5a; /* Coral */
+  
+  /* Colors: Neutral Scale (9 steps from #fafafa to #0f0f0f) */
+  --color-neutral-100: #fafafa;
+  --color-neutral-200: #f5f5f5;
+  --color-neutral-300: #e5e5e5;
+  --color-neutral-400: #d4d4d4;
+  --color-neutral-500: #a3a3a3;
+  --color-neutral-600: #737373;
+  --color-neutral-700: #525252;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #0f0f0f;
+  
+  /* Colors: Semantic */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+  
+  /* Colors: 8 Phase Accent Hues (Distinct & Accessible) */
+  --color-phase-1: #d946ef; /* Fuchsia (meet-participants) */
+  --color-phase-2: #8b5cf6; /* Violet (distributed-keygen) */
+  --color-phase-3: #6366f1; /* Indigo (share-distribution) */
+  --color-phase-4: #0ea5e9; /* Sky (aggregate-pk) */
+  --color-phase-5: #14b8a6; /* Teal (train-encrypt) */
+  --color-phase-6: #84cc16; /* Lime (homomorphic-add) */
+  --color-phase-7: #eab308; /* Yellow (threshold-decrypt) */
+  --color-phase-8: #f97316; /* Orange (global-update) */
+
+  /* Typography: Families */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Inter', system-ui, sans-serif; /* Can be updated later */
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  
+  /* Typography: Size Scale */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  
+  /* Typography: Line Height Scale */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* Spacing: 4px base grid */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-11: 44px;
+  --space-12: 48px;
+  --space-13: 52px;
+  --space-14: 56px;
+  --space-15: 60px;
+  --space-16: 64px;
+  
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  /* Motion */
+  --duration-fast: 100ms;
+  --duration-base: 200ms;
+  --duration-slow: 400ms;
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* High-Contrast Overrides */
+@media (prefers-contrast: more) {
+  :root {
+    --color-primary: #0a5f54; /* Darker teal for higher contrast */
+    --color-secondary: #ad311a; /* Darker coral */
+    
+    --color-neutral-400: #737373;
+    --color-neutral-500: #404040;
+    
+    --color-success: #065f46;
+    --color-warning: #78350f;
+    --color-danger: #7f1d1d;
+    --color-info: #1e3a8a;
+  }
+}
