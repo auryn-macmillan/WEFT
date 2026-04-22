@@ -278,9 +278,9 @@ fn partial_decrypt_inner(secret_share: &[u8], ciphertext: &[u8]) -> Result<Vec<u
     let ciphertext =
         Ciphertext::from_bytes(ciphertext, &params).map_err(|error| error.to_string())?;
     let sk_poly =
-        deserialize_smudging_data(&bundle.sk_poly, &ctx).map_err(|error| error.to_string())?;
+        deserialize_smudging_data(&bundle.sk_poly, ctx).map_err(|error| error.to_string())?;
     let es_poly =
-        deserialize_smudging_data(&bundle.es_poly, &ctx).map_err(|error| error.to_string())?;
+        deserialize_smudging_data(&bundle.es_poly, ctx).map_err(|error| error.to_string())?;
     let share = trbfv
         .decryption_share(Arc::new(ciphertext), sk_poly, es_poly)
         .map_err(|error| error.to_string())?;
@@ -337,7 +337,7 @@ fn combine_decryption_shares_inner(
         }
         reconstructing_parties.push(bundle.party_index as usize);
         decryption_shares.push(
-            deserialize_decryption_share(&bundle.decryption_share, &ctx)
+            deserialize_decryption_share(&bundle.decryption_share, ctx)
                 .map_err(|error| error.to_string())?,
         );
     }

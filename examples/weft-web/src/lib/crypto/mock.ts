@@ -1,4 +1,6 @@
-import { EventEmitter } from 'node:events';
+interface EventEmitter {
+  emit(event: string, ...args: unknown[]): boolean;
+}
 import type {
   BfvParams,
   CiphertextBytes,
@@ -12,10 +14,13 @@ import type {
   TelemetryEventKind,
 } from './engine';
 
+// AGENTS.MD §BFV: source-of-truth for plaintextModulus — do not duplicate elsewhere
+export const PLAINTEXT_MODULUS_VALUE = 131072n;
+
 /** UI dev only; not cryptographically meaningful. */
 export const DEFAULT_PARAMS: BfvParams = {
   presetId: 'SECURE_THRESHOLD_8192',
-  plaintextModulus: 131072n,
+  plaintextModulus: PLAINTEXT_MODULUS_VALUE,
   polyDegree: 8192,
   threshold: 3,
   committeeSize: 5,
@@ -282,20 +287,19 @@ export class MockCryptoEngine implements CryptoEngine {
     emitTelemetry(this.#telemetry, this.#eventEmitter, 'combine-start');
     await sleep(this.#delayMs);
 
-    const threshold = DEFAULT_PARAMS.threshold;
-
-    if (shares.length < threshold) throw new Error(`below threshold: need ${threshold}, got ${shares.length}`);
-
     const ciphertextPayload = decodePayload<MockCiphertextPayload>(ciphertext.bytes);
     const decodedShares = shares.map((share) => decodePayload<MockSharePayload>(share.bytes));
     for (const share of decodedShares) {
       if (share.nonce !== ciphertextPayload.nonce) throw new Error('share/ciphertext mismatch');
     }
 
+    const threshold = decodedShares[0]?.threshold ?? DEFAULT_PARAMS.threshold;
+
+    if (shares.length < threshold) throw new Error(`below threshold: need ${threshold}, got ${shares.length}`);
+
     const length = decodedShares[0]?.plaintextInts.length ?? ciphertextPayload.plaintextInts.length;
     for (const share of decodedShares) {
       if (share.plaintextInts.length !== length) throw new Error('share length mismatch');
-      if (share.threshold !== threshold) throw new Error('share threshold mismatch');
     }
 
     const combined = Int32Array.from(expectedSum(ciphertextPayload.plaintextInts));

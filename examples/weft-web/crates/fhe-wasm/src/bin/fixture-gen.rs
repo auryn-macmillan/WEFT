@@ -57,7 +57,7 @@ fn encode_coefficient(grad_int: i64, t: u64) -> u64 {
 }
 
 fn quantize(grad: f64, scale: u64) -> i64 {
-    let clamped = grad.max(-1.0).min(1.0);
+    let clamped = grad.clamp(-1.0, 1.0);
     (clamped * scale as f64).round() as i64
 }
 
@@ -164,7 +164,7 @@ fn generate_fixture(env: &BfvEnv, spec: &CaseSpec, rng: &mut ChaCha20Rng, out_di
     let scale = spec.scale;
 
     let num_grads = spec.gradients[0].len();
-    let num_chunks = (num_grads + degree - 1) / degree;
+    let num_chunks = num_grads.div_ceil(degree);
 
     let mut per_client_coeffs: Vec<Vec<u64>> = Vec::new();
     for grads in &spec.gradients {
@@ -271,7 +271,7 @@ fn main() {
     let degree = env.degree;
 
     assert!(
-        (10u64 * 4096 * 1) < t / 2,
+        (10u64 * 4096) < t / 2,
         "AGENTS.MD overflow invariant violated for demo params: n_max*S*G must be < t/2"
     );
 

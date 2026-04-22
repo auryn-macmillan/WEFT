@@ -1,6 +1,9 @@
 #![crate_name = "fhe"]
 #![crate_type = "lib"]
 #![warn(missing_docs, unused_imports)]
+#![allow(clippy::unwrap_used)]
+#![allow(clippy::useless_conversion)]
+#![allow(clippy::unnecessary_unwrap)]
 #![doc = include_str!("../README.md")]
 
 mod errors;
