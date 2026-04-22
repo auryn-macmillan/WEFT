@@ -1,0 +1,1 @@
+Build verified with BASE_PATH=/weft. Output populated in examples/weft-web/build/ and includes base-path asset references.
