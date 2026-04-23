@@ -6,6 +6,8 @@ on:
     paths:
       - 'examples/weft-web/**'
       - '.github/workflows/deploy-weft-web.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
   workflow_dispatch:
 
 concurrency:
