@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { base } from '$app/paths';
   import { MockCryptoEngine, PLAINTEXT_MODULUS } from '$lib/crypto/mock';
   import SandboxControls from '$lib/components/SandboxControls.svelte';
   import RunHistory from '$lib/components/RunHistory.svelte';
@@ -100,10 +101,10 @@
     <div class="header">
       <div class="title-row">
         <h1>WEFT Sandbox</h1>
-        <a href="/" class="btn btn-secondary">← Back</a>
+        <a href="{base}/" class="btn btn-secondary">← Back</a>
       </div>
       <div class="framing-notice" data-testid="honest-framing">
-        <strong>Real FHE math, simulated committee topology.</strong> Test out how different configurations affect precision and runtime. <a href="/walkthrough/1-meet" class="learn-link">Learn mode &rarr;</a>
+        <strong>Real FHE math, simulated committee topology.</strong> Test out how different configurations affect precision and runtime. <a href="{base}/walkthrough/1-meet" class="learn-link">Learn mode &rarr;</a>
       </div>
     </div>
 

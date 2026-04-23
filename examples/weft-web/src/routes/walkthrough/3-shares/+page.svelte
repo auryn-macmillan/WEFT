@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { fade, fly } from 'svelte/transition';
 	import PhaseShell from '$lib/components/PhaseShell.svelte';
 	import { phaseStore } from '$lib/stores/phase';
@@ -18,11 +19,11 @@
 	});
 
 	function handleNext() {
-		goto('/walkthrough/4-aggregate-pk');
+		goto(`${base}/walkthrough/4-aggregate-pk`);
 	}
 
 	function handlePrev() {
-		goto('/walkthrough/2-dkg'); // Assuming phase 2 is dkg based on phases.ts
+		goto(`${base}/walkthrough/2-dkg`); // Assuming phase 2 is dkg based on phases.ts
 	}
 
 	const nodeNames = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon'];

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { base } from '$app/paths';
   import { phaseStore } from '$lib/stores/phase';
   import PhaseShell from '$lib/components/PhaseShell.svelte';
   import { HOSPITALS } from '$lib/content/hospitals';
@@ -18,7 +19,7 @@
   ];
 </script>
 
-<PhaseShell phaseId="meet" onNext={() => goto('/walkthrough/2-dkg')}>
+<PhaseShell phaseId="meet" onNext={() => goto(`${base}/walkthrough/2-dkg`)}>
   <svelte:fragment slot="body" let:level>
     <div class="framing-notice" data-testid="honest-framing">
       <strong>Real FHE math, simulated committee topology.</strong> <strong>What's real:</strong> the cryptography. <strong>What's simulated:</strong> the committee runs as 5 Web Workers on your machine; in production these would be 5 independent organizations.

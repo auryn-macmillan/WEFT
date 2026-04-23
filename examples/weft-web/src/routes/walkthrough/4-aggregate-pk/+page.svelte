@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { fade, fly } from 'svelte/transition';
 	import PhaseShell from '$lib/components/PhaseShell.svelte';
 	import { phaseStore } from '$lib/stores/phase';
@@ -24,11 +25,11 @@
 	});
 
 	function handleNext() {
-		goto('/walkthrough/5-train-encrypt');
+		goto(`${base}/walkthrough/5-train-encrypt`);
 	}
 
 	function handlePrev() {
-		goto('/walkthrough/3-shares');
+		goto(`${base}/walkthrough/3-shares`);
 	}
 
 	const nodeNames = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon'];

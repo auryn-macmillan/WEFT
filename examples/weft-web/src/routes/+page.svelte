@@ -1,3 +1,7 @@
+<script>
+  import { base } from '$app/paths';
+</script>
+
 <svelte:head>
   <title>WEFT - Weighted Encrypted Federated Training</title>
   <meta
@@ -37,10 +41,10 @@
     </div>
 
     <nav class="actions">
-      <a class="cta primary" href="/walkthrough/1-meet" data-testid="start-walkthrough">
+      <a class="cta primary" href="{base}/walkthrough/1-meet" data-testid="start-walkthrough">
         Start the walkthrough →
       </a>
-      <a class="cta secondary" href="/sandbox" data-testid="open-sandbox">
+      <a class="cta secondary" href="{base}/sandbox" data-testid="open-sandbox">
         Open sandbox
       </a>
     </nav>
@@ -48,7 +52,7 @@
     <section data-testid="about-demo" class="about">
       <p>
         This is a <strong>simulated</strong> demonstration of privacy-preserving federated training.
-        Please read the <a href="/honest-framing" data-testid="honest-framing-link">Honest Framing & Disclosures</a> before proceeding.
+        Please read the <a href="{base}/honest-framing" data-testid="honest-framing-link">Honest Framing & Disclosures</a> before proceeding.
       </p>
     </section>
   </div>

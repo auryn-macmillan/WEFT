@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { base } from '$app/paths';
   import { phaseStore } from '$lib/stores/phase';
   import { PHASES } from '$lib/content/phases';
   import { MockCryptoEngine, PLAINTEXT_MODULUS } from '$lib/crypto/mock';
@@ -52,11 +53,11 @@
 
   function handleStartOver() {
     phaseStore.resetPhase();
-    goto('/walkthrough/1-meet');
+    goto(`${base}/walkthrough/1-meet`);
   }
 </script>
 
-<PhaseShell phaseId="update-model" onPrev={() => goto('/walkthrough/7-threshold-decrypt')}>
+<PhaseShell phaseId="update-model" onPrev={() => goto(`${base}/walkthrough/7-threshold-decrypt`)}>
   <svelte:fragment slot="body" let:level>
     <div class="framing-notice" data-testid="honest-framing">
       <strong>Real FHE math, simulated committee topology.</strong> The 5 committee nodes run as Web Workers in your browser; in production these would be 5 independent organizations.
@@ -106,7 +107,7 @@
           <PhaseProgress 
             current="update-model" 
             visited={$phaseStore.visited} 
-            onJump={(id) => goto(`/walkthrough/${PHASES.findIndex(p => p.id === id) + 1}-${id}`)}
+            onJump={(id) => goto(`${base}/walkthrough/${PHASES.findIndex(p => p.id === id) + 1}-${id}`)}
           />
         </div>
       </div>
@@ -115,7 +116,7 @@
         <button class="btn btn-secondary" on:click={handleStartOver}>
           Start Over
         </button>
-        <a href="/sandbox" class="btn btn-primary">
+        <a href="{base}/sandbox" class="btn btn-primary">
           Explore the Sandbox
         </a>
       </div>

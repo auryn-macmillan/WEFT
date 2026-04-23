@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { base } from '$app/paths';
   import { phaseStore } from '$lib/stores/phase';
   import { dkgStore } from '$lib/stores/dkg';
   import PhaseShell from '$lib/components/PhaseShell.svelte';
@@ -87,7 +88,7 @@
   const memberNames = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon'];
 </script>
 
-<PhaseShell phaseId="threshold-decrypt" onNext={() => goto('/walkthrough/8-update')} onPrev={() => goto('/walkthrough/6-aggregate')}>
+<PhaseShell phaseId="threshold-decrypt" onNext={() => goto(`${base}/walkthrough/8-update`)} onPrev={() => goto(`${base}/walkthrough/6-aggregate`)}>
   <svelte:fragment slot="body" let:level>
     <div class="framing-notice" data-testid="honest-framing">
       <strong>Real FHE math, simulated committee topology.</strong> The 5 committee nodes run as Web Workers in your browser; in production these would be 5 independent organizations.

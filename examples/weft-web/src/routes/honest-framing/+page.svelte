@@ -1,3 +1,7 @@
+<script>
+  import { base } from '$app/paths';
+</script>
+
 <svelte:head>
   <title>Honest Framing & Disclosures — WEFT</title>
   <meta
@@ -7,7 +11,7 @@
 </svelte:head>
 
 <article class="page" data-testid="honest-framing-page">
-  <p class="back"><a href="/">← Back to home</a></p>
+  <p class="back"><a href="{base}/">← Back to home</a></p>
 
   <h1>Honest Framing &amp; Disclosures</h1>
 
@@ -72,7 +76,7 @@
   </ul>
 
   <p class="proceed">
-    <a class="cta" href="/walkthrough/1-meet" data-testid="proceed-to-walkthrough">
+    <a class="cta" href="{base}/walkthrough/1-meet" data-testid="proceed-to-walkthrough">
       I understand — start the walkthrough →
     </a>
   </p>
