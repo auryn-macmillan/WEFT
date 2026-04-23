@@ -1,6 +1,12 @@
 [workspace]
 members = [
-  "secure-process",
   "examples/weft-web/crates/fhe-wasm",
+]
+# secure-process is intentionally excluded from the root workspace: it has path
+# dependencies on /tmp/enclave (the upstream Interfold monorepo, cloned locally
+# for development) which are not available in CI. Developers working on
+# secure-process should run cargo commands from inside that crate's directory.
+exclude = [
+  "secure-process",
 ]
 resolver = "2"
